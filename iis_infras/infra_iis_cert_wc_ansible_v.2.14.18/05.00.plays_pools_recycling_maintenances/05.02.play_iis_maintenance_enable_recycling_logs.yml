@@ -1,0 +1,35 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/05.00.plays_pools_recycling_maintenances
+# Fichier      : 05.02.play_iis_maintenance_enable_recycling_logs.yml
+# Description  : 
+# ==============================================================================
+# ==============================================================================
+# SYNOPSIS TECHNIQUE & EXPLOITATION DES LOGS DE RECYCLAGE (WAS)
+# ==============================================================================
+# 1. EMPLACEMENT DES TRACES :
+#    - Console : Observateur d'événements Windows (eventvwr.msc)
+#    - Chemin  : Journaux Windows -> Système (Windows Logs -> System)
+#    - Filtre  : Source = "Microsoft-Windows-WAS" (Windows Process Activation Service)
+#
+# 2. DICTIONNAIRE DES ÉVÉNEMENTS GÉNÉRÉS (EVENT IDs) :
+#    L'activation du masque de bits (Schedule, Memory, PrivateMemory, IsapiUnhealthy,
+#    OnDemand, ConfigChange) produit des logs précis selon l'origine du recyclage :
+#
+#    - Event ID 5074 [Schedule]      : Recyclage automatique planifié
+#    - Event ID 5076 [OnDemand]      : Recyclage manuel par un administrateur
+#    - Event ID 5080 [ConfigChange]  : Recyclage automatique suite à une modification
+#    - Event ID 5117 [PrivateMemory] : Recyclage suite à dépassement RAM PRIVÉE
+# ==============================================================================
+
+- name: "IIS MAINTENANCE - Activation des logs de recyclage"
+  hosts: srv_iis
+  gather_facts: false
+  tasks:
+    - name: "LOGS - Configuration du logging Event Log pour chaque pool applicatif"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        $TargetPool = "Pool_{{ item.name }}"
+        # GUI: PrivateMemory=MémoirePrivée | Memory=MémoireVirtuelle | Intervalle=0 (via 08.05)
+        Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$TargetPool']/recycling" -name "logEventOnRecycle" -value "Schedule, Memory, PrivateMemory, IsapiUnhealthy, OnDemand, ConfigChange"
+      loop: "{{ iis_applications }}"

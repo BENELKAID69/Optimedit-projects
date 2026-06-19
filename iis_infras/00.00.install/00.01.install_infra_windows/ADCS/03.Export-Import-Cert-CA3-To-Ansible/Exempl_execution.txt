@@ -1,0 +1,29 @@
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$ ls -al
+total 24
+drwxr-sr-x 2 root          gr_ansible_admins 4096 18 juin  21:18 .
+drwxrwsr-x 5 admin_ansible gr_ansible_admins 4096 18 juin  21:13 ..
+-rw-r--r-- 1 root          gr_ansible_admins 7104 18 juin  21:13 03.Export-Import-Cert-CA3-To-Ansible.yml
+-rwxrwxr-x 1 root          gr_ansible_admins 3302 18 juin  21:18 install_and_test_cert_ca.sh
+-rw-r--r-- 1 root          gr_ansible_admins 1966 18 juin  21:13 Optimedit-CA3.cer
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$ sudo sed -i 's/\r$//' install_and_test_cert_ca.sh
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$ sudo ./install_and_test_cert_ca.sh
+🔍 Étape 1 : Recherche d'un certificat de CA local...
+   [INFO] Certificat source trouvé : Optimedit-CA3.cer
+   [INFO] Copie vers le magasin système : /usr/local/share/ca-certificates/Optimedit-CA3.crt
+🔄 Étape 2 : Rafraîchissement du magasin de certificats (update-ca-certificates)...
+rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+✅ [OK] Le certificat système a été correctement déployé et lié.
+------------------------------------------------------------
+🧪 Étape 3 : Validation interactive de la chaîne TLS
+👉 Entrez le FQDN du serveur Windows à tester (ex: opt-iis-01.optimedit.eu) : opt-iis-01.optimedit.eu
+
+📡 Connexion TLS en cours sur opt-iis-01.optimedit.eu:5986...
+------------------------------------------------------------
+✅ VALIDATION RÉUSSIE !
+Verification: OK
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+------------------------------------------------------------
+driss@master-06:/projets_optimedit/00.00.install/00.01.install_infra_windows/ADCS/03.Export-Import-Cert-CA3-To-Ansible$

@@ -1,0 +1,14 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/02.00.plays_install_iis_pool_http
+# Fichier      : 02.01.play_iis_install_http.yml
+# Description  :          
+# ==============================================================================
+- name: "Préparation et Déploiement des 13 sites HTTP"
+  hosts: srv_iis
+  gather_facts: false
+  vars:
+    enable_ssl: false
+    
+  roles:
+    - iis_setup

@@ -1,0 +1,104 @@
+---
+# Emplacement exact : roles/dc_setup/tasks/main.yml
+
+# =================================================================================================
+# V8.3 --- PRODUCTION STABLE --- Configuration & Sécurisation Native AD (SPN Corrigés)
+# =================================================================================================
+
+# 1. Structure de l'AD (Dynamique via domain_name)
+- name: "AD -01- Création de l'OU pour les comptes de service"
+  microsoft.ad.ou:
+    name: "Service Accounts"
+    path: "{{ 'DC=' + domain_name | replace('.', ',DC=') }}"
+    state: present
+
+# 2. Identités applicatives
+- name: "AD -02- Création des comptes de service applicatifs"
+  microsoft.ad.user:
+    name: "{{ item.name }}"
+    display_name: "Service Account - {{ item.name | title }}"
+    sam_account_name: "{{ item.sam_account_name | default(item.name) }}"
+    password: "{{ app_service_accounts_password }}"
+    path: "{{ app_service_accounts_ou }}"
+    state: present
+    password_never_expires: yes
+    enabled: yes
+  loop: "{{ iis_app_accounts }}"
+
+# BLOC TECHNIQUE : Toutes les tâches suivantes sont exécutées sur le Contrôleur de Domaine
+- name: "Actions déléguées au Contrôleur de Domaine"
+  delegate_to: "{{ groups['srv_dc'][0] }}"
+  block:
+
+    # 3. Configuration de la délégation contrainte avec transition de protocole (S4U) via API Native
+    - name: "AD -03- Force l'activation de la transition de protocole (Native)"
+      ansible.windows.win_powershell:
+        script: |
+          $Srv = "{{ item }}".Split('.')[0]
+          $FS_FQDN = "{{ groups['srv_fs'][0] }}"
+          $FS_Short = $FS_FQDN.Split('.')[0]
+
+          # Cibles autorisées
+          [String[]]$AllowedServices = @("cifs/$FS_Short", "cifs/$FS_FQDN")
+
+          # Récupération de l'état actuel pour le tracking Ansible (changed)
+          $Comp = Get-ADComputer -Identity $Srv -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo
+          
+          $NeedsUAC = $Comp.TrustedToAuthForDelegation -eq $false
+          
+          # Vérification si la liste des services autorisés a changé
+          $CurrentAllowed = $Comp.'msDS-AllowedToDelegateTo'
+          $NeedsServices = $false
+          foreach ($Service in $AllowedServices) {
+              if ($CurrentAllowed -notcontains $Service) { $NeedsServices = $true }
+          }
+
+          if ($NeedsUAC -or $NeedsServices) {
+              # 1. Activation propre de la transition de protocole sans casser le mot de passe machine
+              Set-ADComputer -Identity $Srv -TrustedToAuthForDelegation $true
+
+              # 2. Assignation des services cibles
+              Set-ADComputer -Identity $Srv -Replace @{"msDS-AllowedToDelegateTo" = $AllowedServices}
+              
+              return @{ changed = $true }
+          }
+
+          return @{ changed = $false }
+      loop: "{{ groups['srv_iis'] }}"
+
+    # 4. Configuration des SPN applicatifs (HTTP) réels de Production (CORRIGÉ)
+    - name: "AD -04- Configuration des SPN HTTP pour les identités applicatives"
+      ansible.windows.win_powershell:
+        script: |
+          $Domain = "{{ domain_name }}"
+          # Compte AD (ex: svc_direction)
+          $AccountName = "{{ item.sam_account_name | default(item.name) }}"
+          # Extraction du nom de l'application pure (suppression de 'svc_') pour l'URL
+          $AppName = $AccountName.Replace("svc_", "")
+
+          # Génération des VRAIS SPN de production (ex: http/direction et http/direction.optimedit.eu)
+          $RequiredSPNs = @("http/$AppName", "http/$AppName.$Domain")
+          $CurrentSPNs = (Get-ADUser -Identity $AccountName -Properties ServicePrincipalNames).ServicePrincipalNames
+
+          $ChangesMade = $false
+          foreach ($SPN in $RequiredSPNs) {
+              if ($CurrentSPNs -notcontains $SPN) {
+                  Set-ADUser -Identity $AccountName -Add @{servicePrincipalName=$SPN}
+                  $ChangesMade = $true
+              }
+          }
+          return @{ changed = $ChangesMade }
+      loop: "{{ iis_app_accounts }}"
+
+    # 5. Sécurité compte Ansible
+    - name: "AD -05- S'assurer que le compte Ansible n'est pas protégé contre la délégation"
+      ansible.windows.win_powershell:
+        script: |
+          $User = "{{ ad_admin_account }}"
+          $UserInfo = Get-ADUser -Properties AccountNotDelegated -Identity $User
+
+          if ($UserInfo.AccountNotDelegated -eq $true) {
+              Set-ADUser -Identity $User -AccountNotDelegated $false
+              return @{ changed = $true }
+          }
+          return @{ changed = $false }

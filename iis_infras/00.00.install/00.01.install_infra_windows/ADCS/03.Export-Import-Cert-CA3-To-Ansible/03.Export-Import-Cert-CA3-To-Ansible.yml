@@ -1,0 +1,148 @@
+
+
+
+# Copie le certificat Root de ADCS vers Ansible (Encodé base 64) :
+
+# Optimedit-CA3.cer = certificat de l'autorité ADCS
+
+driss@master-06:/projets_optimedit$ ls -al
+-rw-r--r--  1 root          gr_ansible_admins 1966 18 juin  20:05 Optimedit-CA3.cer
+
+##### Copier-Coller de l'extension ".cer" vers ".crt"
+driss@master-06:/projets_optimedit$ sudo cp Optimedit-CA3.cer /usr/local/share/ca-certificates/Optimedit-CA3.crt
+driss@master-06:/projets_optimedit$ sudo update-ca-certificates
+Updating certificates in /etc/ssl/certs...
+rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+1 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+
+
+driss@master-06:/projets_optimedit$ sudo update-ca-certificates --fresh
+Clearing symlinks in /etc/ssl/certs...
+done.
+Updating certificates in /etc/ssl/certs...
+rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+143 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+
+
+driss@master-06:/projets_optimedit$ ls -l /etc/ssl/certs/Optimedit-CA3.pem
+lrwxrwxrwx 1 root root 50 18 juin  20:12 /etc/ssl/certs/Optimedit-CA3.pem -> /usr/local/share/ca-certificates/Optimedit-CA3.crt
+driss@master-06:/projets_optimedit$
+
+
+# Validation 1 #####################
+openssl s_client -connect opt-iis-01.optimedit.eu:5986 -CApath /etc/ssl/certs/
+
+driss@master-06:/projets_optimedit$ openssl s_client -connect opt-iis-01.optimedit.eu:5986 -CApath /etc/ssl/certs/
+CONNECTED(00000003)
+depth=1 DC = eu, DC = optimedit, CN = Optimedit-CA3
+verify return:1
+depth=0 CN = OPT-IIS-01.optimedit.eu
+verify return:1
+---
+...
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+...
+ggzdzYMtib/mQlyE5iXWBgybQ5QdAl4sHmw=
+-----END CERTIFICATE-----
+subject=CN = OPT-IIS-01.optimedit.eu
+issuer=DC = eu, DC = optimedit, CN = Optimedit-CA3
+---
+...
+---
+SSL handshake has read 2244 bytes and written 409 bytes
+Verification: OK
+---
+...
+Verify return code: 0 (ok)
+...
+# Fin Validation 1 #####################
+
+# Validation 2 #####################
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ cat group_vars/all.yml  | grep validate
+ansible_winrm_server_cert_validation: validate
+
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ ansible srv_iis -m win_ping
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+OPT-IIS-01.optimedit.eu | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$
+
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ ansible srv_fs -m win_ping
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+OPT-FS03.optimedit.eu | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+
+#### srv_dc - Penser a rajouter le DC dans le modele de certificat WinRM créé sur ADCS (Onglet Securité)
+# Par defaut y a que les Ordinateurs de domaine
+# ------------------------------------------------------------------------------------------------------
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ ansible srv_dc -m win_ping
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+DC03.optimedit.eu | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$
+
+# Fin Validation 2 #####################
+
+
+
+####################  Validation certificat généré par CA et conf WinRM HTTPS ################
+##########  conf de kerberos, WinRM https 5986, Certificat TLS validate  #####################
+driss@master-06:/projet_optimedit/Git$ cat group_vars/all.yml
+---
+# Emplacment /projets_optimedit/Git/group_vars/all.yml
+#ansible_user: admin_ansible@OPTIMEDIT.EU
+#ansible_user: driss@OPTIMEDIT.EU
+ansible_password: "Dr/*-101977"
+ansible_connection: winrm
+ansible_winrm_transport: kerberos
+ansible_winrm_scheme: https
+ansible_port: 5986
+ansible_winrm_server_cert_validation: validate # ICI
+....
+# 
+
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ ./00.00.audit_winrm_certs/audit_dynamique_winrm_certs_with_group_vars.sh
+=== DEBUT DE L'AUDIT DYNAMIQUE DES GROUPES ANSIBLE ===
+
+👉 Groupe : [srv_adcs] (1 serveurs)
+FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
+------------------------------------------------------------------------------------------------------------------------
+DC03.optimedit.eu         | 2586854A2FBFAFBC0DC01503D83EFE298788AD2C   | Jun 18 18:34:12 2028 GMT  | VALIDE
+------------------------------------------------------------------------------------------------------------------------
+[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_adcs_20260618_2046.csv
+
+👉 Groupe : [srv_dc] (1 serveurs)
+FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
+------------------------------------------------------------------------------------------------------------------------
+DC03.optimedit.eu         | 2586854A2FBFAFBC0DC01503D83EFE298788AD2C   | Jun 18 18:34:12 2028 GMT  | VALIDE
+------------------------------------------------------------------------------------------------------------------------
+[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_dc_20260618_2046.csv
+
+👉 Groupe : [srv_fs] (1 serveurs)
+FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
+------------------------------------------------------------------------------------------------------------------------
+OPT-FS03.optimedit.eu     | 3BCB3C6D5E5D8720BB2CDB9FD630B7767B484E79   | Jun 18 09:47:42 2028 GMT  | VALIDE
+------------------------------------------------------------------------------------------------------------------------
+[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_fs_20260618_2046.csv
+
+👉 Groupe : [srv_iis] (1 serveurs)
+FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
+------------------------------------------------------------------------------------------------------------------------
+OPT-IIS-01.optimedit.eu   | 3B1B0F6AD1DB094DE809A052C9BB31F8DBC0F510   | Jun 17 15:51:44 2028 GMT  | VALIDE
+------------------------------------------------------------------------------------------------------------------------
+[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_iis_20260618_2046.csv
+
+=== FIN DE L'AUDIT GLOBAL ===
+driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$

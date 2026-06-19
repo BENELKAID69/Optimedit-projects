@@ -1,0 +1,15 @@
+PS C:\Users\Administrateur.OPTIMEDIT> Get-ChildItem Cert:\LocalMachine\My\
+
+
+   PSParentPath : Microsoft.PowerShell.Security\Certificate::LocalMachine\My
+
+Thumbprint                                Subject
+----------                                -------
+EDFFFD5263DC620FF9D4F3609B89ACEE102132A0  CN=*.optimedit.eu
+B4E54F44475D060CBC1EEABE6DC4578480B8C209  CN=iis.optimedit.eu
+8139F61195B16656B15B0CE2F50E2F5C8A8F4318  CN=OPT-FS02.optimedit.eu
+70285625302F0619DFB3C6DC52DB8DB902632799  CN=Optimedit-CA2, DC=optimedit, DC=eu
+
+
+
+Thumbprint  = EDFFFD5263DC620FF9D4F3609B89ACEE102132A0

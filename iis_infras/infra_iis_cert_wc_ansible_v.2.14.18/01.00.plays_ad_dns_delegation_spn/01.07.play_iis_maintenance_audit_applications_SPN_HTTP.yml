@@ -1,0 +1,59 @@
+---
+# ==============================================================================
+# Emplacement  : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Fichier      : 01.07.play_iis_maintenance_audit_applications_SPN_HTTP.yml
+# Description : MAINTENANCE - Audit strict des SPN HTTP (SPN Vrais vs Obsolètes)
+#               SANS AUCUNE MODIFICATION de l'Active Directory.
+# ==============================================================================
+
+- name: "MAINTENANCE - Audit des SPN HTTP Active Directory"
+  hosts: srv_dc
+  gather_facts: false
+
+  tasks:
+    - name: "Chargement des variables applicatives IIS (Liste des 13 sites)"
+      ansible.builtin.include_vars:
+        file: ../group_vars/srv_iis.yml
+
+    - name: "AUDIT - Analyse des SPN pour chaque application"
+      ansible.windows.win_shell: |
+        $AppName = "{{ item.name }}"
+        $Account = "svc_$AppName"
+
+        # Récupération sécurisée de l'attribut ServicePrincipalNames du compte AD
+        $User = Get-ADUser -Filter "SamAccountName -eq '$Account'" -Properties ServicePrincipalNames
+
+        if (-not $User) {
+            Write-Output "Application: [$AppName] -> ERREUR: Compte AD '$Account' introuvable."
+            return
+        }
+
+        $Spns = $User.ServicePrincipalNames
+
+        # Définition des patterns à tester
+        $VraiSpnLong   = "http/$AppName.{{ domain_name }}"
+        $VraiSpnShort  = "http/$AppName"
+        $AncienSpnLong = "http/svc_$AppName.{{ domain_name }}"
+
+        # Évaluation de la conformité Kerberos de production
+        $StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {
+            "VALIDE (Kerberos Cible OK)"
+        } else {
+            "MANQUANT (ERREUR PRODUCTION)"
+        }
+
+        # Détection des restes de l'ancienne configuration
+        $StatusAncien = if ($Spns -contains $AncienSpnLong) {
+            "PRESENT (A NETTOYER)"
+        } else {
+            "ABSENT (PROPRE)"
+        }
+
+        Write-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"
+      loop: "{{ iis_applications }}"
+      register: audit_spn_out
+
+    - name: "AFFICHAGE - Rapport de conformité des SPN HTTP"
+      ansible.builtin.debug:
+        msg: "{{ item.stdout_lines }}"
+      loop: "{{ audit_spn_out.results }}"

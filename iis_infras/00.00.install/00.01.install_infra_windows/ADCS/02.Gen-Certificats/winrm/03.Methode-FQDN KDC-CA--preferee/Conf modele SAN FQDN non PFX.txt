@@ -1,0 +1,1 @@
+Modèle non PFX (non exportable), non Wildcard, mais avec fqdn des serveurs IIS - SAN

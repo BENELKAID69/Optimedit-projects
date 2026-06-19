@@ -1,0 +1,69 @@
+[Version]
+; Signature standard pour les fichiers de requ??te de certificat Windows
+Signature="$Windows NT$"
+
+[NewRequest]
+; "Subject" d??finit l'identit?? principale. Ici, le domaine racine de l'entreprise.
+Subject = "CN=iis.optimedit.eu" 
+
+; "ProviderName" : On utilise le Key Storage Provider (KSP). 
+; OBLIGATOIRE pour les mod??les de Sch??ma 4 et Windows Server 2022.
+; Remplace l'ancien param??tre "KeySpec = 1".
+ProviderName = "Microsoft Software Key Storage Provider"
+
+; Longueur de la cl?? (2048 bits est le standard de s??curit?? actuel)
+KeyLength = 2048
+
+; "Exportable = TRUE" permet d'extraire la cl?? priv??e dans un .pfx pour le copier sur le Broker.
+Exportable = TRUE
+
+; "MachineKeySet = TRUE" installe le certificat pour l'ordinateur et non pour l'utilisateur.
+MachineKeySet = TRUE
+
+; Format de la requ??te (PKCS10 est le format standard pour une demande de certificat)
+RequestType = PKCS10
+
+[Extensions]
+; OID 2.5.29.17 correspond ?? l'extension Subject Alternative Name (SAN).
+2.5.29.17 = "{text}"
+
+; --- Noms de Services (CNAME) ---
+; Ces noms sont des alias DNS simplifi??s pour les utilisateurs (ex: acc??s web ou passerelle).
+_continue_ = "dns=direction.optimedit.eu&"
+_continue_ = "dns=comptabilite.optimedit.eu&"
+_continue_ = "dns=paie.optimedit.eu&"
+_continue_ = "dns=rh.optimedit.eu&"
+_continue_ = "dns=ce.optimedit.eu&"
+_continue_ = "dns=it.optimedit.eu&"
+_continue_ = "dns=production.optimedit.eu&"
+_continue_ = "dns=formation.optimedit.eu&"
+_continue_ = "dns=achat.optimedit.eu&"
+_continue_ = "dns=commercial.optimedit.eu&"
+_continue_ = "dns=client.optimedit.eu&"
+_continue_ = "dns=juridique.optimedit.eu&"
+_continue_ = "dns=blog.optimedit.eu&"
+_continue_ = "dns=optimedit.eu&"
+
+; --- Noms r??els des Serveurs (FQDN) ---
+; Ces noms correspondent aux noms d'h??tes r??els identifi??s dans votre tableau.
+; Indispensable pour ??viter les erreurs de certificat lors des connexions internes entre serveurs.
+_continue_ = "dns=OPT-IIS-01.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-02.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-03.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-04.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-05.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-06.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-07.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-08.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-09.optimedit.eu&"
+_continue_ = "dns=OPT-IIS-10.optimedit.eu&"
+
+; --- Flexibilit?? Wildcard (*.optimedit.eu) ---
+; Permet au certificat de rester valide si on ajoutera de nouveaux serveurs (ex: OPT-RDS-MGT03) 
+; sans devoir r??g??n??rer un nouveau certificat imm??diatement.
+_continue_ = "dns=*.optimedit.eu&"
+
+[RequestAttributes]
+; "CertificateTemplate" : Doit correspondre EXACTEMENT au "Nom du mod??le" sur notre CA.
+; C'est ce param??tre qui d??finit les droits et la dur??e de validit?? du certificat.
+CertificateTemplate = IIS-SAN-PFX-Non-Auto-Reinscription

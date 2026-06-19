@@ -1,0 +1,59 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
+# Fichier      : 03.01.play_iis_flush_ssl_before_config.yml
+# Description  : Flush SSL et Nettoyage Global Dynamique (Basé sur group_vars)         
+# ==============================================================================
+# Étape 1 : Nettoyage complet et sécurisé de port 443 
+
+- name: "IIS - Flush SSL et Nettoyage Global"
+  hosts: srv_iis
+  become: false
+  gather_facts: true
+  tasks:
+
+    - name: "1. Nettoyage complet des liaisons HTTPS existantes sur port 443 des sites métiers"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        # Étape 1 : Parcourir TOUS les sites web locaux un par un
+        Get-ChildItem -Path "IIS:\Sites" | ForEach-Object {
+            $siteName = $_.Name
+            
+            # Étape 2 : Pour chaque site, chercher ses liaisons HTTPS sur le port 443
+            $_.Bindings.Collection | Where-Object { $_.protocol -eq "https" -and $_.bindingInformation -like "*:443:*" } | ForEach-Object {
+                $bindingInfo = $_.bindingInformation
+                
+                # Étape 3 : Supprimer proprement la liaison en ciblant le bon site de façon explicite
+                Remove-WebBinding -Name $siteName -BindingInformation $bindingInfo -Protocol "https"
+            }
+        }
+      ignore_errors: true
+
+    - name: "1b. Suppression du site IIS par défaut"
+      community.windows.win_iis_website:
+        name: "Default Web Site"
+        state: absent
+
+    - name: "2. Nettoyage DYNAMIQUE des SslBindings orphelins (HTTP.sys)"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        # Génération dynamique du Host Header complet
+        $hostHeader = "{{ item.name }}.{{ domain_name }}"
+        $path = "IIS:\SslBindings\*!443!$hostHeader"
+        
+        if (Test-Path $path) { 
+            Remove-Item $path -Force 
+        }
+      loop: "{{ iis_applications }}" # <--- Utilisation de ta liste maîtresse
+      ignore_errors: true
+
+    - name: "3. Nettoyage Radical : Suppression liaison IP Port 0.0.0.0:443"
+      ansible.windows.win_shell: netsh http delete sslcert ipport=0.0.0.0:443
+      register: netsh_res
+      failed_when: false
+      changed_when: "'successfully deleted' in netsh_res.stdout"
+
+    - name: "4. Redémarrage du service Web pour purger la mémoire"
+      ansible.windows.win_service:
+        name: W3SVC
+        state: restarted

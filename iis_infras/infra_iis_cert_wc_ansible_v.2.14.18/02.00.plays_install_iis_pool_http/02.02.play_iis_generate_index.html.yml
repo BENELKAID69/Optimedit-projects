@@ -1,0 +1,26 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/02.00.plays_install_iis_pool_http
+# Fichier      : 02.02.play_iis_generate_index.html.yml
+# Description  :          
+# ==============================================================================
+- name: "Validation finale des sites IIS"
+  hosts: srv_iis
+  become: false
+  gather_facts: true # <-- OBLIGATOIRE pour utiliser sans_hostname
+
+  tasks:
+    - name: "Sécurité - S'assurer que les dossiers de destination existent"
+      ansible.windows.win_file:
+        path: "{{ item.path }}"
+        state: directory
+      loop: "{{ iis_applications }}"
+
+    - name: "Génération des pages index.html de test (Comparaison Hostnames)"
+      ansible.windows.win_copy:
+        content: |
+          <h1>Bienvenue sur le site {{ item.name | upper }} de OPTIMEDIT</h1>
+          <p>Cible Inventaire Ansible : {{ inventory_hostname }}</p>
+          <p>Nom Réel OS Windows (Fact) : {{ ansible_hostname }}</p>
+        dest: "{{ item.path }}\\index.html"
+      loop: "{{ iis_applications }}"

@@ -1,0 +1,33 @@
+---
+# Location : group_vars/srv_iis.yml
+# Informations Certificat (Double-Hop via OPT-FS01)
+# SÉCURISATION : Utilisation de quotes simples pour figer le chemin UNC Windows
+# 1. Le chemin source sur le partage réseau (UNC)
+iis_cert_path: '\\OPT-FS02\Partage\Application-IIS-SAN-Certificat-WC.pfx'
+
+# 2. Le chemin de destination local temporaire centralisé
+iis_cert_local_destination: 'C:\Windows\Temp\IIS-Certificat.pfx'
+
+# Secrets et empreinte
+iis_cert_password: "Dr/*-101977"
+iis_cert_thumbprint: "EDFFFD5263DC620FF9D4F3609B89ACEE102132A0"
+
+# Racine globale de stockage des applications IIS (sans anti-slash de fin)
+iis_apps_root_directory: 'c:\apps_optimedit'
+
+# Liste des 13 Applications Optimedit
+iis_applications:
+  - { name: 'direction', port: 8060, path: '{{ iis_apps_root_directory }}\direction', user: 'OPTIMEDIT\svc_direction' }
+  - { name: 'comptabilite', port: 8061, path: '{{ iis_apps_root_directory }}\comptabilite', user: 'OPTIMEDIT\svc_comptabilite' }
+  - { name: 'paie', port: 8062, path: '{{ iis_apps_root_directory }}\paie', user: 'OPTIMEDIT\svc_paie' }
+  - { name: 'rh', port: 8063, path: '{{ iis_apps_root_directory }}\rh', user: 'OPTIMEDIT\svc_rh' }
+  - { name: 'ce', port: 8064, path: '{{ iis_apps_root_directory }}\ce', user: 'OPTIMEDIT\svc_ce' }
+  - { name: 'it', port: 8065, path: '{{ iis_apps_root_directory }}\it', user: 'OPTIMEDIT\svc_it' }
+  - { name: 'production', port: 8066, path: '{{ iis_apps_root_directory }}\production', user: 'OPTIMEDIT\svc_production' }
+  - { name: 'formation', port: 8067, path: '{{ iis_apps_root_directory }}\formation', user: 'OPTIMEDIT\svc_formation' }
+  - { name: 'achat', port: 8068, path: '{{ iis_apps_root_directory }}\achat', user: 'OPTIMEDIT\svc_achat' }
+  - { name: 'commercial', port: 8069, path: '{{ iis_apps_root_directory }}\commercial', user: 'OPTIMEDIT\svc_commercial' }
+  - { name: 'client', port: 8070, path: '{{ iis_apps_root_directory }}\client', user: 'OPTIMEDIT\svc_client' }
+  - { name: 'juridique', port: 8071, path: '{{ iis_apps_root_directory }}\juridique', user: 'OPTIMEDIT\svc_juridique' }
+  - { name: 'blog', port: 8072, path: '{{ iis_apps_root_directory }}\blog', user: 'OPTIMEDIT\svc_blog' }
+

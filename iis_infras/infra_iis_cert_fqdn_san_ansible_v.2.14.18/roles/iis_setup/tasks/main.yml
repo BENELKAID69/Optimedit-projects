@@ -1,0 +1,157 @@
+---
+# Emplacement : roles/iis_setup/tasks/main.yml
+# V6.5 - PRODUCTION STABLE (Sécurisation des Pools et Authentification Anonyme Validée)
+# Date : 03/06/2026
+
+# ==============================================================================
+# PHASE DE PURGE SÉCURISÉE (Exécutée uniquement sur demande explicite)
+# ==============================================================================
+- name: "PURGE -00a- Suppression de tous les anciens sites (Site_*)"
+  ansible.windows.win_shell: |
+    Import-Module WebAdministration
+    Get-Website | Where-Object { $_.Name -like "Site_*" } | ForEach-Object {
+        Remove-Website -Name $_.Name -ErrorAction SilentlyContinue
+    }
+  when: purge_old_infra | default(false)
+  changed_when: true
+
+- name: "PURGE -00b- Suppression de tous les anciens Application Pools (Pool_*)"
+  ansible.windows.win_shell: |
+    Import-Module WebAdministration
+    Get-ChildItem "IIS:\AppPools" | Where-Object { $_.Name -like "Pool_*" -or $_.Name -like "*item.name*" } | ForEach-Object {
+        Remove-WebAppPool -Name $_.Name -ErrorAction SilentlyContinue
+    }
+  when: purge_old_infra | default(false)
+  changed_when: true
+
+# ==============================================================================
+# PHASE D'INSTALLATION ET CONFIGURATION STANDARD
+# ==============================================================================
+
+# 0. Installation du rôle IIS et outils
+- name: "INSTALL -01- Installation de IIS et des outils de gestion"
+  ansible.windows.win_feature:
+    name:
+      - Web-Server
+      - Web-Mgmt-Console
+      - Web-Scripting-Tools
+    state: present
+  register: iis_install
+
+- name: "REBOOT -02- Redémarrage si nécessaire"
+  ansible.windows.win_reboot:
+  when: iis_install.reboot_required
+
+# 1. Sécurité - Pare-feu
+- name: "FEU -03- Ouverture des ports HTTP/HTTPS"
+  community.windows.win_firewall_rule:
+    name: "Autoriser Trafic IIS"
+    localport: "80,443,8060-8072"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+
+# ==============================================================================
+# 2. Certificat - Importation (Sécurisée contre le Double-Hop WinRM)
+# ==============================================================================
+- name: "CERT -04a- Copie locale du certificat PFX via privilèges SYSTEM"
+  ansible.windows.win_powershell:
+    script: "{{ lookup('ansible.builtin.template', '03.01.copy_cert.ps1.j2') }}"
+  register: cert_copy_res
+
+- name: "CERT -04b- Importation du certificat PFX (Source Locale)"
+  ansible.windows.win_certificate_store:
+    # Utilisation de la variable centralisée
+    path: "{{ iis_cert_local_destination }}"
+    password: "{{ iis_cert_password }}"
+    state: present
+    store_name: My
+
+- name: "CERT -04c- Nettoyage du fichier PFX local temporaire"
+  ansible.windows.win_file:
+    # Utilisation de la variable centralisée ici aussi
+    path: "{{ iis_cert_local_destination }}"
+    state: absent
+
+# ==============================================================================
+# 3. Infrastructure
+# ==============================================================================
+- name: "INFRA -05a- Création des dossiers"
+  ansible.windows.win_file:
+    path: "{{ item.path }}"
+    state: directory
+  loop: "{{ iis_applications }}"
+
+- name: "INFRA -05b- Configuration explicite des Application Pools"
+  community.windows.win_iis_webapppool:
+    name: "Pool_{{ item.name }}"
+    state: started
+    identity_type: SpecificUser
+    username: "{{ item.user }}"
+    password: "{{ app_service_accounts_password }}"
+  loop: "{{ iis_applications }}"
+
+# ==============================================================================
+# 4. Sites & Bindings HTTP & Sécurisation Anonyme
+# ==============================================================================
+- name: "SITE -06- Port dédié et assignation au Pool"
+  community.windows.win_iis_website:
+    name: "Site_{{ item.name }}"
+    state: started
+    port: "{{ item.port }}"
+    physical_path: "{{ item.path }}"
+    application_pool: "Pool_{{ item.name }}"
+  loop: "{{ iis_applications }}"
+
+- name: "BINDING -07- Ajout HostHeader Port 80"
+  community.windows.win_iis_webbinding:
+    name: "Site_{{ item.name }}"
+    protocol: http
+    port: 80
+    host_header: "{{ item.name }}.{{ domain_name }}"
+    state: present
+  loop: "{{ iis_applications }}"
+
+- name: "SÉCURITÉ -07a- Déverrouiller la section de configuration Anonyme au niveau global"
+  ansible.windows.win_shell: |
+    Import-Module WebAdministration
+    # Commande validée unitairement avec succès (rc=0)
+    Set-WebConfiguration -Filter "system.webServer/security/authentication/anonymousAuthentication" -Metadata "overrideMode" -Value "Allow"
+  changed_when: true
+
+- name: "SÉCURITÉ -07b- Configurer l'authentification anonyme pour utiliser l'identité du Pool"
+  ansible.windows.win_shell: |
+    Import-Module WebAdministration
+    Set-WebConfigurationProperty -Filter /system.webServer/security/authentication/anonymousAuthentication -Name userName -Value '' -PSPath "IIS:\Sites\Site_{{ item.name }}"
+  loop: "{{ iis_applications }}"
+  changed_when: true
+
+# ==============================================================================
+# 5. SSL - SNI et Binding 443
+# ==============================================================================
+- name: "SSL -08- Configuration SNI Port 443"
+  ansible.windows.win_shell: |
+    Import-Module WebAdministration
+    $site = "Site_{{ item.name }}"
+    $hostHeader = "{{ item.name }}.{{ domain_name }}"
+    $thumb = "{{ iis_cert_thumbprint }}"
+
+    if (-not (Get-WebBinding -Name $site -Protocol https -Port 443 -HostHeader $hostHeader)) {
+        New-WebBinding -Name $site -Protocol https -Port 443 -IPAddress "*" -HostHeader $hostHeader -SslFlags 1
+    }
+
+    netsh http delete sslcert hostnameport=$($hostHeader + ":443") 2>$null
+
+    $appid = "{4dc3e181-e14b-4a21-b022-59fc669b0914}"
+    netsh http add sslcert hostnameport=$($hostHeader + ":443") certhash=$thumb appid=$appid certstorename=MY
+  loop: "{{ iis_applications }}"
+  when: enable_ssl | default(false)
+  changed_when: true
+
+- name: "RESTART -09- Redémarrage pour prise en compte"
+  ansible.windows.win_service:
+    name: W3SVC
+    state: restarted
+  when: enable_ssl | default(false)
+

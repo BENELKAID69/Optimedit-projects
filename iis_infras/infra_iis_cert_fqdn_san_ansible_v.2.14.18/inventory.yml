@@ -1,0 +1,25 @@
+---
+# Emplacement : /projet_optimedit/Git/inventory.yml
+all:
+  children:
+    srv_dc:
+      hosts:
+        OPT-DC02.optimedit.eu:
+    srv_adcs:
+      hosts:
+        OPT-DC02.optimedit.eu:
+    srv_fs:
+      hosts:
+        OPT-FS02.optimedit.eu:
+    srv_citrix_ddc:
+      hosts:
+    srv_citrix_stf:
+      hosts:
+    srv_citrix_vda:
+      hosts:
+    srv_iis:
+      hosts:
+        #OPT-IIS-[01:11].optimedit.eu:
+        #OPT-IIS-0[5:6].optimedit.eu:
+        OPT-IIS-1[2:3].optimedit.eu:
+        #OPT-IIS-10.optimedit.eu:

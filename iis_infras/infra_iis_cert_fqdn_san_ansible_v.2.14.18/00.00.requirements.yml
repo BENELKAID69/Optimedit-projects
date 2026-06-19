@@ -1,0 +1,16 @@
+# ====================================================================================================
+# EXECUTER CETTE COMMANDE DEPUIS LE REPERTOIRE DU PROJET :
+# driss@master-03:/projets_optimedit/Git/infra_iis_cert_wc_ansible_v.2.14.18$
+#
+# ansible-galaxy collection install -r 00.00.requirements.yml -p ./collections --force
+# ====================================================================================================
+---
+# Emplacement : /projets_optimedit/Git/infra_iis_cert_wc_ansible_v.2.14.18/00.00.requirements.yml
+# Aligné à 100% sur les versions validées de master-02
+
+collections:
+  - name: ansible.windows
+    version: 3.5.0
+
+  - name: community.windows
+    version: 3.1.0

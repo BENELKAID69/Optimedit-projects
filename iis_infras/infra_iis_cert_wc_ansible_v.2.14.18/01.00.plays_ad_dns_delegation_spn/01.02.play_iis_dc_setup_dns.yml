@@ -1,0 +1,33 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Fichier      : 01.02.play_iis_dc_setup_dns.yml
+# Description  :          
+# ==============================================================================
+- name: "Configuration des enregistrements DNS pour IIS"
+  hosts: srv_dc
+  gather_facts: false
+  tasks:
+    - name: "Chargement des variables applicatives IIS (Liste des 13 sites)"
+      ansible.builtin.include_vars:
+        file: ../group_vars/srv_iis.yml
+
+    - name: "DNS - Création/Mise à jour des records A (Round Robin)"
+      ansible.windows.win_dns_record:
+        name: "{{ item.0.name }}"
+        # Utilisation de la variable globale définie dans inventory.yml
+        zone: "{{ domain_name }}"
+        type: "A"
+        # Récupère l'IP depuis hostvars
+        value: "{{ hostvars[item.1]['srv_ip_address'] }}"
+        state: present
+      # loop : item.0 = application, item.1 = serveur
+      loop: "{{ iis_applications | product(groups['srv_iis']) | list }}"
+      register: dns_result
+
+    - name: "Recapitulatif DNS"
+      ansible.builtin.debug:
+        msg: "DNS mis à jour pour {{ item.0.name }}.{{ domain_name }} -> {{ hostvars[item.1]['srv_ip_address'] }}"
+      loop: "{{ iis_applications | product(groups['srv_iis']) | list }}"
+      # On n'affiche que ce qui a réellement été modifié
+      when: dns_result.changed

@@ -1,0 +1,52 @@
+<#
+.SYNOPSIS
+    Script d'audit de sécurité NTFS pour les applications OPTIMEDIT.
+
+.DESCRIPTION
+    Analyse dynamiquement les permissions sur les sous-dossiers applicatifs
+    en se basant sur la racine centralisée définie dans Ansible.
+
+.COMPONENT
+    Ansible Role : roles\iis_setup\templates
+
+.NOTES
+    Projet      : Optimedit Infrastructure
+    Auteur      : Driss Benelkaid (optimedit.fr@gmail.com)
+    Date        : 04/06/2026
+    Version     : 2.6
+    Ansible Path: roles\iis_setup\templates\06.06.audit_acl_directory_apps.ps1.j2
+#>
+
+# --- Configuration dynamique via Jinja2 ---
+$RootPath = "{{ iis_apps_root_directory }}"
+$AppFolders = Get-ChildItem -Path $RootPath -Directory
+
+$Result = foreach ($Folder in $AppFolders) {
+    $TargetSvcAccount = "OPTIMEDIT\svc_$($Folder.Name)"
+    $Acl = Get-Acl -Path $Folder.FullName
+    $SvcAccess = $Acl.Access | Where-Object { $_.IdentityReference -eq $TargetSvcAccount }
+
+    if ($SvcAccess) {
+        foreach ($Access in $SvcAccess) {
+            [PSCustomObject]@{
+                "Application"      = $Folder.Name
+                "Account"          = $Access.IdentityReference
+                "Rights"           = $Access.FileSystemRights.ToString()
+                "IsInherited"      = $Access.IsInherited
+                "InheritanceFlags" = $Access.InheritanceFlags.ToString()
+            }
+        }
+    } else {
+        [PSCustomObject]@{
+            "Application"      = $Folder.Name
+            "Account"          = $TargetSvcAccount
+            "Rights"           = "NOT_FOUND"
+            "IsInherited"      = $true
+            "InheritanceFlags" = "NONE"
+        }
+    }
+}
+
+# On retourne le flux d'objets natifs. Le module win_powershell d'Ansible
+# intercepte ce tableau et le convertit directement en dictionnaire utilisable.
+$Result

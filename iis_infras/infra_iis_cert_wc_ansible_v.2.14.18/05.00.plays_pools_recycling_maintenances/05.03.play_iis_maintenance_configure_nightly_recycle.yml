@@ -1,0 +1,54 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/05.00.plays_pools_recycling_maintenances
+# Fichier      : 05.03.play_iis_maintenance_configure_nightly_recycle.yml
+# Description  : MAINTENANCE - Planification du recyclage nocturne à 03:00:00
+# ==============================================================================
+# ==============================================================================
+# SYNOPSIS TECHNIQUE : PLANIFICATION DU RECYCLAGE NOCTURNE DES POOLS
+# ==============================================================================
+# 1. RÔLE & UTILITÉ :
+#    - Centralise et force le recyclage automatique de tous les pools à 03:00:00.
+#    - Utilité : Libère la mémoire RAM accumulée (fuites de mémoire), nettoie les 
+#      connexions SQL/Ressources orphelines et prévient la dégradation des performances
+#      sans impacter les utilisateurs (période creuse hors production).
+#
+# 2. MÉCANISME INTERNE (ZÉRO COUPE DE SERVICE DETECTABLE) :
+#    - IIS utilise le mécanisme "Overlapping" (chevauchement) : à 03:00, il crée un 
+#      NOUVEAU processus w3wp.exe pour traiter les nouvelles requêtes entrantes, 
+#      pendant que l'ANCIEN processus termine tranquillement ses requêtes en cours 
+#      avant de s'éteindre proprement. 
+#
+# 3. POINTS CRITIQUES DE LA CONFIGURATION (CE QUE FAIT CE PLAY) :
+#    - Étape 1 : Désactive le recyclage par défaut basé sur l'intervalle de temps 
+#      (le fameux '1740 minutes' ou 29 heures par défaut d'IIS) en le forçant à 00:00:00.
+#    - Étape 2 : Purge l'historique ou les autres horaires pour éviter les doublons.
+#    - Étape 3 : Injecte l'horaire fixe unique de 03:00:00.
+#
+# 4. EXPLOITATION & CORRÉLATION (PLAYBOOK 08.04 & 08.07) :
+#    - Suite à l'activation des logs dans le playbook 08.04, chaque exécution 
+#      nocturne automatique de 03:00 générera un Event ID 5074 [Schedule] sous 
+#      la source "Microsoft-Windows-WAS" dans le journal Système.
+# ==============================================================================
+
+- name: "IIS MAINTENANCE - Configuration du recyclage nocturne des Pools"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    - name: "PLANIFICATION - Purge et configuration de l'horaire fixe à 03:00:00"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        
+        # Correction de la casse : Usage de la majuscule 'Pool_' pour cibler les vrais objets IIS
+        $TargetPool = "Pool_{{ item.name }}"
+
+        # 1. Désactivation du recyclage par intervalle régulier -> mis à 00:00:00
+        Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$TargetPool']/recycling/periodicRestart" -name "time" -value "00:00:00"
+
+        # 2. Purge complète des anciens horaires planifiés s'il y en a
+        Clear-WebConfiguration -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$TargetPool']/recycling/periodicRestart/schedule"
+
+        # 3. Ajout de l'horaire unique fixe de 03:00:00
+        Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$TargetPool']/recycling/periodicRestart/schedule" -name "." -value @{value="03:00:00"}
+      loop: "{{ iis_applications }}"

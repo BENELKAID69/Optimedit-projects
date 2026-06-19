@@ -1,0 +1,43 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/05.00.plays_pools_recycling_maintenances
+# Fichier      : 05.04.play_iis_audit_pools_recycling_status.yml
+# Description  : AUDIT - Génération du rapport de planification des AppPools
+# ==============================================================================
+# ==============================================================================
+# SYNOPSIS TECHNIQUE & VÉRIFICATION DE LA MAINTENANCE DES POOLS IIS
+# ==============================================================================
+# 1. RÔLE & UTILITÉ :
+#    - Scanne dynamiquement tous les pools d'applications présents sur le serveur.
+#    - Extrait et affiche de manière synthétique l'état de la planification.
+#
+# 2. SIBLES DE CONFORMITÉ (CORRÉLATION AVEC LES PLAYBOOKS 08.04 ET 08.05) :
+#    - Intervalle actif           -> Doit afficher 00:00:00 (Signifie que l'intervalle
+#                                    de 1740 minutes par défaut est désactivé).
+#    - Recyclage fixe             -> Doit afficher 03:00:00 (Horaire nocturne forcé).
+# ==============================================================================
+
+- name: "IIS AUDIT - Rapport de configuration du recyclage"
+  hosts: srv_iis
+  gather_facts: false
+  tasks:
+    - name: "AUDIT - Récupération de la configuration courante dans IIS"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        Get-ChildItem "IIS:\AppPools" | ForEach-Object {
+            $name = $_.Name
+            $sched = (Get-ItemProperty "IIS:\AppPools\$name").recycling.periodicRestart.schedule.collection
+            $time = (Get-ItemProperty "IIS:\AppPools\$name").recycling.periodicRestart.time.Value
+            
+            # Recyclage fixe à 03:00:00 attendu | Intervalle de sécurité (ou régulier) à 00:00:00 attendu
+            if ($sched.value) {
+                "Pool: [$name] -> Recyclage fixe à $($sched.value) | Intervalle de sécurité : $time"
+            } else {
+                "Pool: [$name] -> Pas de recyclage fixe défini | Intervalle actif : $time"
+            }
+        }
+      register: check_recycling
+
+    - name: "📊 RAPPORT SYNTHÉTIQUE DES POOLS IIS"
+      ansible.builtin.debug:
+        msg: "{{ check_recycling.stdout_lines }}"

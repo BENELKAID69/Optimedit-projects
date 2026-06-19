@@ -1,0 +1,15 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
+# Fichier      : 03.02.play_iis_ssl_https.yml
+# Description  :         
+# ==============================================================================
+# Étape 2 : Configuration HTTPS pure avec Host Header strict SNI (-HostHeader -SslFlags 1)
+- name: "Configuration SSL pour les 13 sites"
+  hosts: srv_iis
+  become: false
+  vars:
+    enable_ssl: true
+  roles:
+    - iis_setup
+

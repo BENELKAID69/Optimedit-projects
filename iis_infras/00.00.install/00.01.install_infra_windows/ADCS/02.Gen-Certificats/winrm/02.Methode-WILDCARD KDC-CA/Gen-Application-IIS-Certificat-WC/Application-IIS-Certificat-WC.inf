@@ -1,0 +1,26 @@
+[Version]
+Signature="$Windows NT$"
+
+[NewRequest]
+Subject = "CN=*.optimedit.eu" 
+ProviderName = "Microsoft Software Key Storage Provider"
+KeyLength = 2048
+Exportable = TRUE
+MachineKeySet = TRUE
+RequestType = PKCS10
+
+[Extensions]
+; OID 2.5.29.17 pour le Subject Alternative Name (SAN)
+2.5.29.17 = "{text}"
+; Ligne 1 : S?curise le domaine racine (ex: https://optimedit.eu)
+_continue_ = "dns=optimedit.eu&"
+; Ligne 2 : S?curise ABSOLUMENT TOUT le reste (serveurs et applications)
+_continue_ = "dns=*.optimedit.eu"
+
+[RequestAttributes]
+CertificateTemplate = "IIS-SAN-PFX-Non-Auto-Reinscription"
+
+
+
+
+

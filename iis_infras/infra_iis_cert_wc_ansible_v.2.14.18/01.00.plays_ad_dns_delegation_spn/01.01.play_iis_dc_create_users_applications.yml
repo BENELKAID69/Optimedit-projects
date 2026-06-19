@@ -1,0 +1,81 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Fichier      : 01.01.play_iis_dc_create_users_applications.yml
+# Description  :          
+# ==============================================================================
+
+       
+# PREMIER PLAY : Configuration de l'Active Directory (Cible le DC)
+- name: "DC - Provisioning des comptes et configuration AD"
+  hosts: srv_dc
+  gather_facts: false
+  roles:
+    - dc_setup
+
+# DEUXIÈME PLAY : Maintenance et Test de la délégation (Cible les serveurs IIS)
+- name: "IIS - Rafraîchissement du cache Kerberos et Test de délégation"
+  hosts: srv_iis
+  gather_facts: false
+  tasks:
+    - name: "Maintenance - Purge des tickets Kerberos (Session SYSTEM et User)"
+      ansible.windows.win_powershell:
+        script: |
+          # Purge pour le compte SYSTEM (Session 0x3e7)
+          klist purge -li 0x3e7
+          # Purge pour l'utilisateur admin_ansible
+          klist purge
+      register: purge_result
+
+    - name: "Validation - Test d'accès SMB sous le contexte NT AUTHORITY\\SYSTEM"
+      ansible.windows.win_powershell:
+        script: |
+          $FS_Target = "\\{{ groups['srv_fs'][0] }}\Partage"
+          $TaskName = "Ansible_Kerberos_Check"
+          
+          # Script qui sera exécuté en tâche planifiée par le compte SYSTEM
+          $ScriptBlockStr = @"
+          try {
+              Get-ChildItem -Path '$FS_Target' -ErrorAction Stop
+              Set-Content -Path 'C:\Windows\Temp\krb_test.txt' -Value 'SUCCESS'
+          } catch {
+              Set-Content -Path 'C:\Windows\Temp\krb_test.txt' -Value "ERROR: `$(`$_.Exception.Message)"
+          }
+          "@
+          
+          # Encodage en Base64 pour éviter tout problème de caractères
+          $Bytes = [System.Text.Encoding]::Unicode.GetBytes($ScriptBlockStr)
+          $Encoded = [Convert]::ToBase64String($Bytes)
+          
+          # Action : Lancer PowerShell avec le script encodé
+          $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -EncodedCommand $Encoded"
+          $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+          
+          # Création et déclenchement immédiat
+          $Task = Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal
+          Start-ScheduledTask -TaskName $TaskName
+          
+          # Attente de la fin de l'exécution (max 10 secondes)
+          $Timeout = 10
+          while ((Get-ScheduledTask -TaskName $TaskName).State -eq 'Running' -and $Timeout -gt 0) {
+              Start-Sleep -Seconds 1
+              $Timeout--
+          }
+          
+          # Nettoyage de la tâche planifiée
+          Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+          
+          # Analyse du résultat écrit par SYSTEM
+          if (Test-Path 'C:\Windows\Temp\krb_test.txt') {
+              $Result = Get-Content -Path 'C:\Windows\Temp\krb_test.txt'
+              Remove-Item -Path 'C:\Windows\Temp\krb_test.txt' -Force
+              
+              if ($Result -eq 'SUCCESS') {
+                  return @{ changed = false; msg = "Délégation Kerberos validée avec succès par SYSTEM vers $FS_Target" }
+              } else {
+                  throw "Échec de la délégation Kerberos : $Result"
+              }
+          } else {
+              throw "La tâche planifiée éphémère n'a pas pu générer de rapport."
+          }
+      changed_when: false

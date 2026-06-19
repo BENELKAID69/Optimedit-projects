@@ -1,0 +1,5 @@
+---
+# Fichier auto-généré pour OPT-IIS-07.optimedit.eu
+
+# On filtre le tableau pour exclure les patterns IPv6 (contenant des ':')
+srv_ip_address: "192.168.3.169"

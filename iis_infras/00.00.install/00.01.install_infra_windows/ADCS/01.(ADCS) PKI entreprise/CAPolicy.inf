@@ -1,0 +1,17 @@
+[Version]
+Signature="$Windows NT$"
+
+[Certsrv_Server]
+# Configuration de la clé et validité de la CA Racine (Root CA)
+RenewalKeyLength=4096
+RenewalValidityPeriod=Years
+RenewalValidityPeriodUnits=10
+AlternateSignatureAlgorithm=0
+
+# Configuration des listes de révocation (CRL) initiales
+CRLPeriod=Weeks
+CRLPeriodUnits=1
+CRLDeltaPeriod=Days
+CRLDeltaPeriodUnits=1
+CRLOverlapPeriod=Hours
+CRLOverlapPeriodUnits=12

@@ -1,0 +1,48 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/05.00.plays_pools_recycling_maintenances
+# Fichier      : 05.01.play_iis_maintenance_AHH_AHS_Local_Keys_aspnet_regiis.yml
+# Description  : 
+# ==============================================================================
+# SYNOPSIS :
+# IIS utilise des clés de chiffrement locales (gérées par le service Application 
+# Host Helper Service / AppHostSvc) pour masquer les données sensibles de sa 
+# configuration, comme les mots de passe des comptes de clés de pools d'applications 
+# (svc_rh, svc_comptabilite, etc.) dans le fichier applicationHost.config.
+#
+# CONTEXTE ET CYCLE DE VIE :
+# 1. Génération automatique : Ces clés de chiffrement (IISConfigurationKey et iisWasKey) 
+#    sont générées automatiquement par Windows lors de l'installation du rôle IIS.
+# 2. Durée de vie locale : Ces clés ont une durée de vie par défaut (généralement 
+#    entre 30 et 90 jours selon les politiques de l'OS ou de l'Active Directory).
+# 3. Le déclencheur : L'avertissement ID 9009 apparaît simplement parce qu'un ancien 
+#    serveur (comme OPT-IIS-07) tourne depuis un certain temps et que sa clé locale 
+#    système arrive en fin de validité. Windows prévient qu'il va devoir la renouveler.
+#
+# SOLUTION :
+# Pour forcer le renouvellement propre de ces clés locales via Ansible afin de 
+# nettoyer les anciens serveurs de la ferme Optimedit, la procédure standard 
+# consiste à purger les conteneurs existants puis à les recréer via aspnet_regiis.
+# ==============================================================================
+
+- name: "IIS MAINTENANCE - Gestion et Renouvellement des Clés de Chiffrement IIS"
+  hosts: srv_iis
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: "MAINTENANCE IIS - Renouvellement des clés locales [IISConfigurationKey] et [iisWasKey] (Event ID 9009)"
+      ansible.windows.win_shell: |
+        Set-Location -Path "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
+
+        # 1. Nettoyage et Recreation du conteneur IISConfigurationKey
+        # L'ajout de l'argument -pz détruit proprement le conteneur de clé existant qui bloquait l'exécution.
+        .\aspnet_regiis.exe -pz "IISConfigurationKey"
+        # La commande -pc s'exécute juste après sur un terrain propre, génère une clé neuve et la marque comme exportable (-exp).
+        .\aspnet_regiis.exe -pc "IISConfigurationKey" -exp
+
+        # 2. Nettoyage et Recreation du conteneur iisWasKey
+        # L'ajout de l'argument -pz détruit proprement le conteneur de clé existant qui bloquait l'exécution.
+        .\aspnet_regiis.exe -pz "iisWasKey"
+        # La commande -pc s'exécute juste après sur un terrain propre, génère une clé neuve et la marque comme exportable (-exp).
+        .\aspnet_regiis.exe -pc "iisWasKey" -exp

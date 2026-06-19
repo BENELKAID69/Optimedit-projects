@@ -1,0 +1,10 @@
+---
+# Emplacement : /projet_optimedit/Git/group_vars/srv_dc.yml
+ansible_become: true
+
+# Paramètres de connexion WinRM pour le DC
+ansible_connection: winrm
+ansible_winrm_transport: kerberos
+ansible_winrm_server_cert_validation: validate  # Le certificat du DC utilise un certificat auto-signé ou un certificat dont la chaîne n'est pas encore totalement approuvée par la machine Linux Ansible.
+ansible_port: 5986
+

@@ -1,0 +1,61 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Fichier      : 01.04.play_iis_dc_ad_spn.yml
+# Description  : Playbook de remédiation et mise à jour industrielle des SPN HTTP
+#                sur le Contrôleur de Domaine avec factorisation complète (DRY).
+# ==============================================================================
+
+- name: "AD - Déploiement et Application des Vrais SPN Applicatifs"
+  hosts: srv_dc
+  gather_facts: false
+
+  # ==============================================================================
+  # CENTRALISATION DES VARIABLES DE CHEMINS (SOURCE & DESTINATION)
+  # ==============================================================================
+  vars:
+    spn_local_source_path: "../roles/dc_setup/files/02.03.Update-IIS-SPNs.ps1"
+    spn_remote_script_path: "C:\\Windows\\Temp\\02.03.Update-IIS-SPNs.ps1"
+
+  tasks:
+    - name: "SPN - Copie du script PowerShell de remédiation depuis les fichiers du rôle"
+      ansible.windows.win_copy:
+        src: "{{ spn_local_source_path }}"
+        dest: "{{ spn_remote_script_path }}"
+
+    - name: "SPN - Création de la tâche planifiée avec élévation de privilèges AD"
+      community.windows.win_scheduled_task:
+        name: "Ansible_Fix_IIS_SPNs"
+        description: "Contournement du Double-Hop WinRM pour mise à jour des SPN"
+        actions:
+          - path: "PowerShell.exe"
+            arguments: "-NoProfile -ExecutionPolicy Bypass -File {{ spn_remote_script_path }} -DomainFQDN '{{ domain_name }}' -DomainNetBIOS '{{ domain_netbios }}'"
+        username: "{{ domain_netbios }}\\Administrateur"
+        password: "{{ ad_admin_password | default(app_service_accounts_password) }}"
+        logon_type: password
+        state: present
+        enabled: true
+      register: task_creation
+
+    - name: "SPN - Déclenchement forcé de la tâche planifiée"
+      ansible.windows.win_shell: |
+        Start-ScheduledTask -TaskName "Ansible_Fix_IIS_SPNs"
+      when: task_creation.changed
+
+    - name: "SPN - Temporisation pour exécution du traitement AD"
+      ansible.builtin.pause:
+        seconds: 10
+      when: task_creation.changed
+
+    - name: "SPN - Nettoyage de la tâche planifiée sur le DC"
+      community.windows.win_scheduled_task:
+        name: "Ansible_Fix_IIS_SPNs"
+        state: absent
+
+    # ==============================================================================
+    # NETTOYAGE SÉCURISÉ
+    # ==============================================================================
+    - name: "SPN - Nettoyage du script PowerShell temporaire sur le DC"
+      ansible.windows.win_file:
+        path: "{{ spn_remote_script_path }}"
+        state: absent

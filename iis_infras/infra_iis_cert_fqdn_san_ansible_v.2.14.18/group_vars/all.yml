@@ -1,0 +1,112 @@
+---
+# ==============================================================================
+# CONFIGURATION GLOBALE DES VARIABLES (ANSIBLE GROUP_VARS)
+# ==============================================================================
+# Emplacement : /projet_optimedit/Git/group_vars/all.yml
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# SECTION : STRATÉGIE D'IDENTITÉ ET SURCHARGE DYNAMIQUE (SSO KERBEROS)
+# ------------------------------------------------------------------------------
+# Déclarations statiques obsolètes (Maintenues pour historique et audit) :
+#ansible_user: admin_ansible@OPTIMEDIT.EU
+#ansible_user: driss@OPTIMEDIT.EU
+
+# Mécanisme d'injection dynamique du Principal Kerberos :
+# Permet une authentification interactive sans persistance des identifiants en clair.
+# Prérequis réglementaire : Instanciation d'une variable d'environnement dédiée dans le profil du Master Linux.
+# Commande d'initialisation : echo 'export ANSIBLE_NET_USER="admin_ansible"' >> ~/.bashrc
+# sobashrcurce ~/. # surcharge var sans se deconnecter
+# Processus opérationnel : L'opérateur doit uniquement instancier son ticket de sécurité via la commande 'kinit'.
+
+# Logique Jinja2 d'évaluation par cascade (Fallback séquentiel) :
+# 1. Surcharge CLI (ansible_user_override) -> 2. Variable de session Linux (ANSIBLE_NET_USER) -> 3. Valeur nominale de secours
+ansible_user: "{{ ansible_user_override | default(lookup('env', 'ANSIBLE_NET_USER')) | default('admin_ansible') }}@OPTIMEDIT.EU"
+
+# Procédure de délégation inter-opérateur (Surcharge de contexte multi-admin) :
+# Si l'administrateur s'exécute depuis une session système tierce (ex: 'driss' agissant sous le contexte 'admin_ansible'),
+# l'identité du Principal Kerberos doit être explicitement injectée via l'argument d'extra-vars '-e' :
+# admin_ansible@master-03:/projet_optimedit/Git$ ansible-playbook ex.playbook.yml -e "ansible_user_override=driss"
+
+# Sécurisation des secrets d'authentification :
+#ansible_password: "Dr/*-101977" -- Directive obsolète. La clé d'authentification est déléguée au sous-système de sécurité Kerberos ou demandée de manière interactive.
+
+# ------------------------------------------------------------------------------
+# SECTION : PARAMÈTRES DE TRANSPORT ET COUCHE RESEAU WinRM
+# ------------------------------------------------------------------------------
+# Driver de connexion pour le ciblage des hôtes Windows Server
+ansible_connection: winrm
+
+# Fournisseur de sécurité (SSP) : Négociation cryptographique Kerberos (SSO natif)
+ansible_winrm_transport: kerberos
+
+# Couche de transport : Chiffrement SSL/TLS pour l'intégrité des flux d'administration
+ansible_winrm_scheme: https
+
+# Port d'écoute standard pour le service WinRM sécurisé
+ansible_port: 5986
+
+# Politique de vérification SSL : Validation stricte de la chaîne de confiance de la CA d'entreprise
+ansible_winrm_server_cert_validation: validate
+
+# ------------------------------------------------------------------------------
+# SECTION : VARIABLES MÉTIER PARTAGÉES (ACTIVE DIRECTORY & INFRASTRUCTURE IIS)
+# ------------------------------------------------------------------------------
+# Élévation de privilèges (Désactivée : Persistance du contexte de sécurité de l'appelant WinRM)
+ansible_become: false
+
+# Espace de nommage racine du domaine Active Directory
+domain_name: "optimedit.eu"
+
+# Nom NetBIOS du domaine généré dynamiquement via indexation (Donne : OPTIMEDIT)
+domain_netbios: "{{ domain_name.split('.')[0] | upper }}"
+
+# Identifiant de l'administrateur de référence pour l'orchestration des objets de l'annuaire
+# Extrait dynamiquement le SamAccountName (ce qui précède le @OPTIMEDIT.EU) de l'utilisateur Ansible actif
+# Elle prend le split s'il y a un @, sinon prend toute la chaîne
+ad_admin_account: "{{ ansible_user.split('@')[0] if '@' in ansible_user else ansible_user }}"
+#ad_admin_account: "admin_ansible"
+
+# ------------------------------------------------------------------------------
+# SECTION : PARAMÉTRAGE SYSTÈME LOCAL (MASTER ANSIBLE LINUX)
+# ------------------------------------------------------------------------------
+# Utilisateur système local dédié à l'exécution des playbooks
+system_ansible_user: "admin_ansible"
+
+# Groupe local de sécurité Linux propriétaire du référentiel et des configurations Git
+system_ansible_group: "gr_ansible_admins"
+
+# ------------------------------------------------------------------------------
+# SECTION : ARCHITECTURE ET TOPOLOGIE DES COMPTES DE SERVICE (COMPTES APPLICATIFS)
+# ------------------------------------------------------------------------------
+# Chemin LDAP (Distinguished Name) de l'Unité d'Organisation cible pour l'isolation des comptes
+app_service_accounts_ou: "OU=Service Accounts,DC=optimedit,DC=eu"
+
+# Nom centralisé du groupe de sécurité AD pour les comptes de pools IIS
+iis_service_accounts_group: "G_IIS_ServiceAccounts"
+
+# Secret d'authentification initial appliqué lors du provisionning des identités de service
+# Note d'évolution architecturale : Ce secret sera ultérieurement externalisé et chiffré via Ansible Vault
+app_service_accounts_password: "Driss_21_10_1977" # appelée dans 02.03.play, 06.04.play,  
+ad_admin_password: "Dr/*-101977" # appelée dans 02.03.play, 
+# ------------------------------------------------------------------------------
+# SECTION : RÉFÉRENTIEL DES APPLICATIONS (MATRICE DE PROVISIONNING DES POOLS IIS)
+# ------------------------------------------------------------------------------
+# Liste maîtresse des identités de service (Service Accounts) à instancier pour le cloisonnement des applications web
+iis_app_accounts:
+  - name: "svc_direction"
+  - name: "svc_comptabilite"
+  - name: "svc_paie"
+  - name: "svc_rh"
+  - name: "svc_ce"
+  - name: "svc_it"
+  - name: "svc_production"
+  - name: "svc_formation"
+  - name: "svc_achat"
+  - name: "svc_commercial"
+  - name: "svc_client"
+  - name: "svc_juridique"
+  - name: "svc_blog"
+  
+
+

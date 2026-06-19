@@ -1,0 +1,70 @@
+<#
+.SYNOPSIS
+    Contourne le problème du "Double-Hop" WinRM pour copier un certificat PFX 
+    depuis un partage réseau vers un répertoire local.
+
+.DESCRIPTION
+    Ce script crée une tâche planifiée volatile s'exécutant sous le compte 
+    SYSTEM. Cela permet d'utiliser l'identité de la machine (Computer Account) 
+    pour accéder aux ressources réseau, évitant ainsi les limitations de 
+    délégation de jetons de WinRM.
+
+.PARAMETER Source
+    Chemin UNC du certificat (ex: \\Serveur\Partage\cert.pfx). Ici $Source = "{{ iis_cert_path }}" var play d'ansible
+    
+.NOTES
+    Projet      : Optimedit Infrastructure
+    Auteur      : Driss Benelkaid (optimedit.fr@gmail.com)
+    Date        : 04/06/2026
+    Version     : 2.0
+    Ansible Path: roles\iis_setup\templates\03.01.copy_cert.ps1.j2
+#>
+
+# --- Configuration des variables via Jinja2 ---
+$Source = "{{ iis_cert_path }}"
+$LocalDest = "{{ iis_cert_local_destination }}" # = sur var ansible ex: 'C:\Windows\Temp\IIS-Certificat.pfx'
+$TaskName = "Ansible_Cert_Copy"
+
+# --- Nettoyage préalable ---
+# On s'assure que le dossier temporaire est propre avant de commencer
+if (Test-Path $LocalDest) {
+    Remove-Item $LocalDest -Force
+}
+
+# --- Préparation de la commande encodée ---
+# On utilise Base64 pour éviter les erreurs d'interprétation des guillemets
+$ScriptBlockStr = "Copy-Item -Path '$Source' -Destination '$LocalDest' -Force"
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($ScriptBlockStr)
+$Encoded = [Convert]::ToBase64String($Bytes)
+
+# --- Création de la Tâche Planifiée ---
+# L'action lance PowerShell avec la commande encodée
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -EncodedCommand $Encoded"
+
+# Utilisation du compte SYSTEM pour élever les privilèges et sortir du contexte WinRM
+$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+# Enregistrement et exécution immédiate
+$Task = Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal
+Start-ScheduledTask -TaskName $TaskName
+
+# --- Surveillance de l'exécution ---
+# On attend que la tâche se termine (timeout de 10 secondes)
+$Timeout = 10
+while ((Get-ScheduledTask -TaskName $TaskName).State -eq 'Running' -and $Timeout -gt 0) {
+    Start-Sleep -Seconds 1
+    $Timeout--
+}
+
+# --- Nettoyage du système ---
+# On supprime la tâche immédiatement après usage pour ne pas polluer le serveur
+Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+
+# --- Vérification finale (Retour pour Ansible) ---
+if (Test-Path $LocalDest) {
+    # Renvoie un objet JSON exploitable par Ansible
+    return @{ changed = $true; msg = "Certificat copie localement avec succes." }
+} else {
+    # Génère une erreur critique si le fichier est absent
+    throw "Impossible de copier le certificat depuis le partage reseau. Verifiez les droits de l'ordinateur sur le partage."
+}

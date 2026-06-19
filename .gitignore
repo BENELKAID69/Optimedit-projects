@@ -1,0 +1,21 @@
+# --- Racine du dépôt (/projets_optimedit/) ---
+# Emplacement : /projets_optimedit/.gitignore
+
+# Ignorer les collections téléchargées localement dans chaque projet
+**/collections/
+**/ansible_collections/
+
+# git status : si on voit des dossiers collections/ dans la liste, on devrait les retirer de l'index de Git (sans les supprimer du disque) avec :
+# git rm -r --cached **/collections/
+# Ensuite, on pourra faire git commit et git push.
+
+# Ignorer les fichiers temporaires ou de retry d'Ansible
+*.retry
+*.log
+**/deploy_execution.log
+
+# Ignorer les fichiers potentiellement sensibles (Vault)
+*vault*.yml
+
+# Ignorer les rapports d'audit CSV dans tous les sous-projets
+**/00.00.audit_winrm_certs/csv_result/*.csv

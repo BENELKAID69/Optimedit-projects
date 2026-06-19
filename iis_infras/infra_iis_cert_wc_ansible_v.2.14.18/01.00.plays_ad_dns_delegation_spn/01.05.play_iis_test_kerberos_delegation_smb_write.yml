@@ -1,0 +1,117 @@
+---
+# ==============================================================================
+# Emplacement  : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Fichier      : 01.05.play_iis_test_kerberos_delegation_smb_write.yml
+# Description  : Playbook d'Audit - Validation de la Délégation Kerberos.
+#                Incorpore une pause de 5s pour permettre la validation visuelle
+#                du jeton réseau avant son auto-nettoyage.
+# ==============================================================================
+
+- name: "IIS - Validation de la Délégation Kerberos et Test d'Écriture SMB"
+  hosts: srv_iis
+  gather_facts: false
+
+  vars:
+    kerberos_task_name: "Ansible_Kerberos_DoubleHop_Check"
+    iis_diagnostic_log: "C:\\Windows\\Temp\\Diagnostic_Kerberos_Report.txt"
+
+  tasks:
+    # ==============================================================================
+    # 1. PRÉPARATION ET MAINTENANCE SÉCURISÉE
+    # ==============================================================================
+    - name: "KERBEROS - Purge des tickets (Session SYSTEM et Contexte Courant)"
+      ansible.windows.win_powershell:
+        script: |
+          klist purge -li 0x3e7
+          klist purge
+
+    # ==============================================================================
+    # 2. EXÉCUTION DU TEST AVEC PAUSE DE VALIDATION VISUELLE
+    # ==============================================================================
+    - name: "KERBEROS - Test d'accès ÉCRITURE SMB via Tâche Planifiée SYSTEM"
+      ansible.windows.win_powershell:
+        script: |
+          $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+          $FS_Target = "..\\{{ groups['srv_fs'][0] }}\Partage"
+          
+          # Cibles de fichiers
+          $RemoteLogFile = "$FS_Target\krb_SUCCESS_from_$($env:COMPUTERNAME)_$Timestamp.txt"
+          $DiagLog = "{{ iis_diagnostic_log }}"
+
+          # LOGIQUE INTERNE DE LA TÂCHE PLANIFIÉE
+          $ScriptBlockStr = @"
+          `$DebugInfo = @()
+          `$DebugInfo += "===================================================="
+          `$DebugInfo += "--- RAPPORT DE DIAGNOSTIC KERBEROS SYSTEM ---"
+          `$DebugInfo += "===================================================="
+          `$DebugInfo += "Date execution : $(Get-Date)"
+          `$DebugInfo += "Serveur IIS    : `$env:COMPUTERNAME"
+          `$DebugInfo += "Cible FS UNC   : '$FS_Target'"
+
+          try {
+              # Étape 1 : Test de visibilité réseau du partage
+              if (-not (Test-Path '$FS_Target')) {
+                  throw "Le chemin réseau '$FS_Target' n'est pas résolu ou inaccessible par SYSTEM."
+              }
+
+              # Étape 2 : Tentative d'écriture physique via le Double-Hop Kerberos
+              Set-Content -Path '$RemoteLogFile' -Value "SUCCESS : Ecriture Kerberos fonctionnelle" -ErrorAction Stop
+              
+              # ==============================================================================
+              # AJOUT D'UNE PAUSE DE 5 SECONDES POUR PERMETTRE LA VALIDATION MANUELLE
+              # ==============================================================================
+              Start-Sleep -Seconds 5
+
+              # Étape 3 : LE NETTOYAGE PROMPT (Après la pause)
+              if (Test-Path '$RemoteLogFile') {
+                  Remove-Item -Path '$RemoteLogFile' -Force -ErrorAction SilentlyContinue
+              }
+
+              `$DebugInfo += "STATUS RESULTAT: OK - SUCCÈS TOTAL"
+              `$DebugInfo += "Détails        : Le jeton a été écrit, maintenu 5s, puis nettoyé avec succès."
+              `$DebugInfo += "Validation     : Chaîne de délégation Kerberos 100% opérationnelle."
+          } catch {
+              `$DebugInfo += "STATUS RESULTAT: CRITICAL - ÉCHEC DOUBLE-HOP"
+              `$DebugInfo += "Message Erreur : `$(`$_.Exception.Message)"
+              `$DebugInfo += "Note           : Impossible de joindre ou d'écrire sur le stockage distant via Kerberos."
+          }
+
+          `$DebugInfo += "===================================================="
+          
+          # Écriture du rapport de conformité sur le serveur IIS
+          Set-Content -Path '$DiagLog' -Value (`$DebugInfo -join "`r`n") -Force
+          "@
+
+          # Encodage Base64
+          $Bytes = [System.Text.Encoding]::Unicode.GetBytes($ScriptBlockStr)
+          $Encoded = [Convert]::ToBase64String($Bytes)
+
+          # Création et déclenchement de la tâche planifiée volatile sous SYSTEM
+          $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -EncodedCommand $Encoded"
+          $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+          
+          $Task = Register-ScheduledTask -TaskName "{{ kerberos_task_name }}" -Action $Action -Principal $Principal
+          Start-ScheduledTask -TaskName "{{ kerberos_task_name }}"
+
+          # Augmentation du timeout Ansible à 25 secondes pour absorber le Start-Sleep interne
+          $Timeout = 25
+          while ((Get-ScheduledTask -TaskName "{{ kerberos_task_name }}").State -eq 'Running' -and $Timeout -gt 0) {
+              Start-Sleep -Seconds 1
+              $Timeout--
+          }
+
+          # Purge de la tâche planifiée de l'OS
+          Unregister-ScheduledTask -TaskName "{{ kerberos_task_name }}" -Confirm:$false
+      register: target_execution
+
+    # ==============================================================================
+    # 3. CAPTURE ET RESTITUTION À LA CONSOLE
+    # ==============================================================================
+    - name: "KERBEROS - Lecture du fichier de diagnostic persistant"
+      ansible.windows.win_shell: |
+        Get-Content -Path "{{ iis_diagnostic_log }}"
+      register: read_report
+
+    - name: "KERBEROS - Affichage du Rapport de Diagnostic Restitué"
+      ansible.builtin.debug:
+        msg: "{{ read_report.stdout_lines }}"

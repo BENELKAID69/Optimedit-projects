@@ -1,0 +1,59 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Fichier      : 04.03.iis.test_dir_acl_apps_Use_--limit_cible.yml
+# Description  : Playbook d'Audit et de Validation de Conformité NTFS pour les applications IIS.
+#                Analyse dynamiquement les permissions et valide le Hardening.
+# Utilisation  : ansible-playbook 04.03.iis.test_dir_acl_apps_Use_--limit_cible.yml --limit <SERVEUR>    
+# ==============================================================================
+
+
+- name: "AUDIT - Vérification de la conformité des ACL NTFS"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    # ==============================================================================
+    # 1. EXÉCUTION DU TEMPLATE POWERSHELL D'AUDIT
+    # ==============================================================================
+    # Utilisation de win_powershell + lookup template pour injecter les variables
+    # de group_vars/srv_iis.yml de manière totalement dynamique.
+    # ==============================================================================
+    - name: "AUDIT - Collecte et analyse des permissions NTFS via script dynamique"
+      ansible.windows.win_powershell:
+        script: "{{ lookup('ansible.builtin.template', '../roles/iis_setup/templates/06.06.audit_acl_directory_apps.ps1.j2') }}"
+      register: audit_raw_result
+
+    # ==============================================================================
+    # 2. PARSING DU RÉSULTAT ET VÉRIFICATION AUTOMATIQUE DE LA CONFORMITÉ
+    # ==============================================================================
+    # Cette tâche décode le tableau d'objets renvoyé par win_powershell (.output)
+    # et boucle sur chaque application trouvée. Elle applique des tests d'assertion stricts.
+    # Si un test échoue, le playbook s'arrête en erreur (FAILED) pour le serveur ciblé.
+    # ==============================================================================
+    - name: "AUDIT - Validation des règles de conformité (Hardening Check)"
+      ansible.builtin.assert:
+        that:
+          # Règle 1 : L'héritage NTFS doit être explicitement brisé (IsInherited = False)
+          # pour empêcher la propagation de droits permissifs depuis la racine C:\
+          - not item.IsInherited
+
+          # Règle 2 : Une entrée d'accès (ACE) explicite doit être trouvée
+          # pour le compte de service dédié dans l'ACL du dossier.
+          - item.Rights != "NOT_FOUND"
+
+          # Règle 3 : Le compte de service doit disposer des privilèges requis
+          # (Modify ou FullControl) pour le bon fonctionnement de l'Application Pool.
+          - "'Modify' in item.Rights or 'FullControl' in item.Rights"
+
+        # Message personnalisé en cas de non-conformité détectée (État Vulnérable)
+        fail_msg: "ALERTE SÉCURITÉ : L'application [{{ item.Application }}] n'est pas conforme ! Compte: {{ item.Account }}, Droits: {{ item.Rights }}, Héritage hérité: {{ item.IsInherited }}"
+
+        # Message de succès lorsque l'isolation et les permissions de l'application sont validées
+        success_msg: "CONFORME : L'application [{{ item.Application }}] est correctement isolée ({{ item.Rights }})."
+
+      # win_powershell stocke le tableau structuré d'objets directement ici
+      loop: "{{ audit_raw_result.output }}"
+      loop_control:
+        # Simplifie l'affichage dans la console Ansible en affichant uniquement le nom de l'application
+        label: "{{ item.Application }}"

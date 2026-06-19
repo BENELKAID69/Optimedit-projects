@@ -1,0 +1,68 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Fichier      : 04.02.play_iis_acl_applications.yml
+# Description  : Hardening NTFS radical (Coupure héritage + Purge      
+# ==============================================================================
+
+- name: "HARDENING - Configuration Forcée des ACL NTFS"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    # ==============================================================================
+    # 1. RUPTURE FORCÉE DE L'HÉRITAGE ET PURGE COMPLÈTE VIA POWERSHELL
+    # ==============================================================================
+    - name: "HARDENING - Rupture de l'héritage et purge absolue"
+      ansible.windows.win_shell: |
+        # Utilisation de item.path défini dans group_vars
+        $Path = "{{ item.path }}"
+        $Acl = Get-Acl -Path $Path
+        
+        # SetAccessRuleProtection($isProtected, $preserveInheritance)
+        # $isProtected = $true -> Bloque l'héritage du parent
+        # $preserveInheritance = $false -> Supprime (purge) toutes les lignes copiées !
+        $Acl.SetAccessRuleProtection($true, $false)
+        
+        # Force l'application immédiate sur le dossier
+        Set-Acl -Path $Path -AclObject $Acl
+      loop: "{{ iis_applications }}"
+
+    # ==============================================================================
+    # 2. RECONSTRUCTION DES ACCÈS DU SYSTEM NATIVE
+    # ==============================================================================
+    - name: "SÉCURITÉ - Réattribution du SYSTEM local"
+      ansible.windows.win_acl:
+        path: "{{ item.path }}"
+        user: "NT AUTHORITY\\SYSTEM"
+        rights: FullControl
+        type: allow
+        state: present
+        inheritance: ContainerInherit, ObjectInherit
+      loop: "{{ iis_applications }}"
+
+    # ==============================================================================
+    # 3. RECONSTRUCTION DES ACCÈS DES ADMINISTRATEURS (SID)
+    # ==============================================================================
+    - name: "SÉCURITÉ - Réattribution du groupe Administrateurs local (SID: S-1-5-32-544)"
+      ansible.windows.win_acl:
+        path: "{{ item.path }}"
+        user: "S-1-5-32-544"
+        rights: FullControl
+        type: allow
+        state: present
+        inheritance: ContainerInherit, ObjectInherit
+      loop: "{{ iis_applications }}"
+
+    # ==============================================================================
+    # 4. APPLICATION DU COMPTE DE SERVICE AD DÉDIÉ
+    # ==============================================================================
+    - name: "NTFS - Attribution des droits d'accès pour le compte de service"
+      ansible.windows.win_acl:
+        path: "{{ item.path }}"
+        user: "{{ item.user }}"
+        rights: Modify
+        type: allow
+        state: present
+        inheritance: ContainerInherit, ObjectInherit
+      loop: "{{ iis_applications }}"

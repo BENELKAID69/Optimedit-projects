@@ -1,0 +1,57 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Fichier      : 04.01.play_iis_hardening_pool_svc.yml
+# Description  : Configuration sécurisée des Application Pools IIS avec identités AD        
+# ==============================================================================
+
+
+- name: "HARDENING - Application Pools & Identités AD"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    - name: "SÉCURITÉ - Autoriser le groupe global à ouvrir une session en tant que service"
+      ansible.windows.win_user_right:
+        name: SeServiceLogonRight
+        users:
+          # Concaténation propre de la variable NetBIOS et de la variable centralisée du groupe
+          - "{{ domain_netbios }}\\{{ iis_service_accounts_group }}"
+        action: set
+      register: policy_changed
+
+    # Force Windows à relire la table des privilèges LSA si modifiée
+    - name: "SÉCURITÉ - Rafraîchissement des privilèges système"
+      ansible.windows.win_shell: |
+        gpupdate /force
+        iisreset
+      when: policy_changed.changed
+
+    # ==============================================================================
+    # CONFIGURATION DES POOLS APPLICATIFS
+    # ==============================================================================
+    - name: "POOL - Configuration de l'identité AD et du profil"
+      community.windows.win_iis_webapppool:
+        name: "Pool_{{ item.name }}"
+        state: started
+        attributes:
+          processModel.identityType: SpecificUser
+          # Utilisation du format UPN (ex: svc_direction@optimedit.eu) plus robuste
+          processModel.userName: "svc_{{ item.name }}@{{ domain_name }}"
+          processModel.password: "{{ app_service_accounts_password }}"
+          processModel.loadUserProfile: true
+      loop: "{{ iis_applications }}"
+      no_log: true # Sécurisation de l'affichage des secrets dans la console
+
+    # ==============================================================================
+    # NETTOYAGE & SÉCURISATION DU DEFAULTAPPPOOL
+    # ==============================================================================
+    - name: "SÉCURITÉ - Arrêt et désactivation du DefaultAppPool"
+      community.windows.win_iis_webapppool:
+        name: "DefaultAppPool"
+        state: stopped
+
+    - name: "SÉCURITÉ - Forcer le DefaultAppPool à ne démarrer aucun worker"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        Set-ItemProperty "IIS:\AppPools\DefaultAppPool" -Name autoStart -Value $false

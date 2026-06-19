@@ -1,0 +1,39 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/05.00.plays_pools_recycling_maintenances
+# Fichier      : 05.05.play_iis_audit_was_activity_logs.yml
+# Description  : AUDIT - Extraction des 5 derniers logs système du service WAS
+# ==============================================================================
+
+- name: "IIS AUDIT - Rapport d'activité du service de gestion WAS"
+  hosts: srv_iis
+  gather_facts: false
+  tasks:
+    - name: "AUDIT - Extraction des derniers logs de vie du service WAS (Journal System)"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        $ids = 5074, 5076, 5211, 5080
+        $events = Get-WinEvent -LogName System -ErrorAction SilentlyContinue | Where-Object { $_.ProviderName -eq "Microsoft-Windows-WAS" -and $ids -contains $_.Id } | Select-Object -First 5
+        if ($events) {
+            foreach ($e in $events) {
+                $time = $e.TimeCreated.ToString("yyyy-MM-dd HH:mm:ss")
+                $type = switch($e.Id) {
+                    5211 { "DEMARRAGE SERVICE" }
+                    5074 { "RECYCLAGE PLANIFIE" }
+                    5076 { 
+                        if ($e.Message -like "*planifiée*") { "RECYCLAGE HORAIRE PLANIFIE" }
+                        else { "RECYCLAGE MANUEL (ON-DEMAND)" }
+                    }
+                    5080 { "MODIFICATION CONFIGURATION" }
+                    Default { "AUTRE" }
+                }
+                Write-Output "[$time] ID $($e.Id) ($type) - $($e.Message)"
+            }
+        } else {
+            Write-Output "Aucune trace WAS récente détectée dans le journal d'événements System."
+        }
+      register: exe_logs
+
+    - name: "📊 DERNIERS ÉVÉNEMENTS WAS DÉTECTÉS"
+      ansible.builtin.debug:
+        msg: "{{ exe_logs.stdout_lines }}"

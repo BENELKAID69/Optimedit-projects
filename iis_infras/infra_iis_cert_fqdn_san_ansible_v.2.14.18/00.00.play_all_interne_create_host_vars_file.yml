@@ -1,0 +1,23 @@
+---
+# Emplacement /projet_optimedit/Git/00.00.play_all_interne_create_host_vars_file.yml
+
+- name: "PROVISIONING - Génération automatique des fichiers host_vars"
+  hosts: srv_iis
+  gather_facts: true
+  ignore_unreachable: true
+  tasks:
+    - name: "AUTO-CONFIG - Écriture du fichier host_vars avec droits explicites"
+      delegate_to: localhost
+      ansible.builtin.copy:
+        dest: "host_vars/{{ inventory_hostname }}.yml"
+        content: |
+          ---
+          # Fichier auto-généré pour {{ inventory_hostname }}
+
+          # On filtre le tableau pour exclure les patterns IPv6 (contenant des ':')
+          srv_ip_address: "{{ ansible_ip_addresses | reject('search', ':') | first }}"
+
+        force: yes
+        # Retrait de "mode" pour laisser le SGID et le système gérer les droits sans lever d'erreur
+      become: false
+      when: ansible_ip_addresses is defined and ansible_ip_addresses | length > 0

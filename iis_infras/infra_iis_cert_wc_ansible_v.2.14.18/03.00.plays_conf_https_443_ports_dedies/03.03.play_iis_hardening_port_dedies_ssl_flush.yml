@@ -1,0 +1,60 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
+# Fichier      : 03.03.play_iis_hardening_port_dedies_ssl_flush.yml
+# Description  :         
+# ==============================================================================
+# Étape 1 : Nettoyage complet et sécurisé des ports dédiés 
+
+- name: "HARDENING - Flush et nettoyage des anomalies sur ports dédiés"
+  hosts: srv_iis
+  become: false
+  gather_facts: false
+  tasks:
+
+    - name: "1. FLUSH IIS - Suppression des liaisons HTTP/HTTPS corrompues ou mal configurées"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        $siteName = "Site_{{ item.name }}"
+        $port = "{{ item.port }}"
+        $changed = $false
+
+        # On récupère toutes les liaisons sur ce port dédié précis (HTTP ou HTTPS)
+        $bindings = Get-WebBinding -Name $siteName | Where-Object { $_.bindingInformation -like "*:${port}:*" }
+        
+        foreach ($binding in $bindings) {
+            # Suppression chirurgicale de la liaison, peu importe son état ou son protocole
+            Remove-WebBinding -Name $siteName -BindingInformation $binding.bindingInformation -Protocol $binding.protocol
+            $changed = $true
+        }
+
+        if ($changed) { Write-Output "IIS_BINDINGS_CLEANED" }
+      loop: "{{ iis_applications }}"
+      register: iis_flush
+      changed_when: "'IIS_BINDINGS_CLEANED' in iis_flush.stdout"
+
+    - name: "2. FLUSH HTTP.SYS - Purge des certificats orphelins ou mal mappés"
+      ansible.windows.win_shell: |
+        $port = "{{ item.port }}"
+        
+        # Capture de l'état réseau actuel du port
+        $check = netsh http show sslcert ipport=0.0.0.0:$port 2>$null
+        
+        # ANNIHILATION DU PIÈGE POWERSHELL : On force le flag de sortie à 0 pour éviter le crash d'Ansible
+        $global:LastExitCode = 0 
+
+        # Si un certificat (même invalide ou expiré) est lié à ce port au niveau du noyau Windows, on le purge
+        if ($check -match "IP:port" -or $check -match "Hostname:port" -or $check -match "0.0.0.0:$port") {
+            netsh http delete sslcert ipport=0.0.0.0:$port 2>$null
+            $global:LastExitCode = 0
+            Write-Output "HTTPSYS_PURGED"
+        }
+      loop: "{{ iis_applications }}"
+      register: netsh_flush
+      changed_when: "'HTTPSYS_PURGED' in netsh_flush.stdout"
+
+    - name: "3. Redémarrage de sécurité du service Web (W3SVC)"
+      ansible.windows.win_service:
+        name: W3SVC
+        state: restarted
+      when: iis_flush.changed or netsh_flush.changed

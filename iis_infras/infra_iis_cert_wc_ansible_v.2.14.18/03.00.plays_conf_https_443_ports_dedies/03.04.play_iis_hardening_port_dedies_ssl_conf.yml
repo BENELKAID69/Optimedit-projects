@@ -1,0 +1,45 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
+# Fichier      : 03.04.play_iis_hardening_port_dedies_ssl_conf.yml
+# Description  :         
+# ==============================================================================
+# Étape 2 : Configuration HTTPS pure avec Host Header strict (Zéro cross-binding) et pas de SNI (-SslFlags 0)
+
+- name: "HARDENING - Configuration SSL sur les ports dédiés"
+  hosts: srv_iis
+  become: false
+  gather_facts: false
+  tasks:
+
+    - name: "1. CONFIGURATION HTTPS - Création de la liaison sécurisée avec Host Header"
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        $site = "Site_{{ item.name }}"
+        $dedicatedPort = "{{ item.port }}"
+        $domain = "{{ item.name }}.optimedit.eu"
+        $thumb = "{{ iis_cert_thumbprint }}"
+        $changed = $false
+
+        # CONFIGURATION HTTPS : Liaison stricte combinant IP (*), Port et Host Header (SslFlags 0 = Pas de SNI requis)
+        $httpsBinding = Get-WebBinding -Name $site -Protocol "https" -Port $dedicatedPort
+        if (-not $httpsBinding) {
+            # On force le HostHeader pour que seul le bon domaine puisse ouvrir ce port
+            New-WebBinding -Name $site -Protocol "https" -Port $dedicatedPort -IPAddress "*" -HostHeader $domain -SslFlags 0
+            
+            # BINDING CERTIFICAT : Association du certificat SSL à la liaison IIS
+            $binding = Get-WebBinding -Name $site -Protocol "https" -Port $dedicatedPort -HostHeader $domain
+            $binding.AddSslCertificate($thumb, "My")
+            $changed = $true
+        }
+
+        if ($changed) { Write-Output "CONFIG_APPLIED" }
+      loop: "{{ iis_applications }}"
+      register: iis_conf
+      changed_when: "'CONFIG_APPLIED' in iis_conf.stdout"
+
+    - name: "2. Redémarrage final pour validation de la configuration HTTPS"
+      ansible.windows.win_service:
+        name: W3SVC
+        state: restarted
+      when: iis_conf.changed
