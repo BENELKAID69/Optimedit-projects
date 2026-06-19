@@ -113,7 +113,7 @@ ansible_winrm_server_cert_validation: validate # ICI
 ....
 # 
 
-driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$ ./00.00.audit_winrm_certs/audit_dynamique_winrm_certs_with_group_vars.sh
+driss@master-06:/projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18$ ./00.00.audit_winrm_certs/audit_dynamique_winrm_certs_with_group_vars.sh
 === DEBUT DE L'AUDIT DYNAMIQUE DES GROUPES ANSIBLE ===
 
 👉 Groupe : [srv_adcs] (1 serveurs)
@@ -121,28 +121,34 @@ FQDN                      | THUMBPRINT                                 | EXPIRAT
 ------------------------------------------------------------------------------------------------------------------------
 DC03.optimedit.eu         | 2586854A2FBFAFBC0DC01503D83EFE298788AD2C   | Jun 18 18:34:12 2028 GMT  | VALIDE
 ------------------------------------------------------------------------------------------------------------------------
-[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_adcs_20260618_2046.csv
+[OK] Rapport généré : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_adcs_20260619_2113.csv
 
 👉 Groupe : [srv_dc] (1 serveurs)
 FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
 ------------------------------------------------------------------------------------------------------------------------
 DC03.optimedit.eu         | 2586854A2FBFAFBC0DC01503D83EFE298788AD2C   | Jun 18 18:34:12 2028 GMT  | VALIDE
 ------------------------------------------------------------------------------------------------------------------------
-[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_dc_20260618_2046.csv
+[OK] Rapport généré : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_dc_20260619_2113.csv
 
 👉 Groupe : [srv_fs] (1 serveurs)
 FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
 ------------------------------------------------------------------------------------------------------------------------
 OPT-FS03.optimedit.eu     | 3BCB3C6D5E5D8720BB2CDB9FD630B7767B484E79   | Jun 18 09:47:42 2028 GMT  | VALIDE
 ------------------------------------------------------------------------------------------------------------------------
-[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_fs_20260618_2046.csv
+[OK] Rapport généré : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_fs_20260619_2113.csv
 
-👉 Groupe : [srv_iis] (1 serveurs)
+👉 Groupe : [srv_iis] (6 serveurs)
 FQDN                      | THUMBPRINT                                 | EXPIRATION                | STATUS
 ------------------------------------------------------------------------------------------------------------------------
 OPT-IIS-01.optimedit.eu   | 3B1B0F6AD1DB094DE809A052C9BB31F8DBC0F510   | Jun 17 15:51:44 2028 GMT  | VALIDE
+OPT-IIS-02.optimedit.eu   | 8733E3A8649DCAAE4B2BB97C08F51F66480EEE96   | Jun 17 16:11:44 2028 GMT  | VALIDE
+OPT-IIS-03.optimedit.eu   | 6342F77BEFF65419E79E44E3A3F9ADE79E906DFC   | Jun 17 16:15:03 2028 GMT  | VALIDE
+OPT-IIS-04.optimedit.eu   | 51FC5370585F977B0790EB8248870490A76DDE92   | Jun 17 16:12:59 2028 GMT  | VALIDE
+OPT-IIS-05.optimedit.eu   | 2055707EDAB5F4E5692869A5782871F70F71237C   | Jun 17 16:13:56 2028 GMT  | VALIDE
+OPT-IIS-06.optimedit.eu   | 04113F1D769FDAD18C33DB4A67EE86BCAB1329D7   | Jun 17 16:17:27 2028 GMT  | VALIDE
 ------------------------------------------------------------------------------------------------------------------------
-[OK] Rapport généré : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_iis_20260618_2046.csv
+[OK] Rapport généré : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/csv_result/audit_winrm_srv_iis_20260619_2113.csv
 
 === FIN DE L'AUDIT GLOBAL ===
+
 driss@master-06:/projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18$

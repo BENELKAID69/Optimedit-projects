@@ -14,6 +14,11 @@ NC='\033[0m'
 
 LOG_FILE="deploy_execution.log"
 
+# Sécurité : S'assurer que le fichier est inscriptible par l'utilisateur courant
+touch "$LOG_FILE"
+sudo chown $(whoami):gr_ansible_admins "$LOG_FILE"
+chmod 664 "$LOG_FILE"
+
 echo -e "${BLUE}===================================================================${NC}"
 echo -e "${BLUE}    Lancement du Déploiement Complet de l'Infrastructure Wildcard   ${NC}"
 echo -e "${BLUE}===================================================================${NC}"
