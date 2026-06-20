@@ -1,9 +1,10 @@
 #!/bin/bash
-
 # ==============================================================================
 # Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/
-# Fichier      : run_all_playbooks.sh
-# Description  : Exécution de tous les Playbooks
+# Fichier     : run_all_playbooks.sh
+# Version  : 3 - rajout verification kinit
+# date : 20/06/2026
+# Description : Exécution de tous les Playbooks
 # ==============================================================================
 # Configuration des couleurs pour l'affichage
 GREEN='\033[0;32m'
@@ -27,14 +28,25 @@ echo "Début de l'exécution : $(date)" > $LOG_FILE
 execute_playbook() {
     local playbook_path=$1
     local description=$2
-    
+
+    # Vérification du ticket Kerberos avant chaque exécution
+    klist -s
+    if [ $? -ne 0 ]; then
+        echo -e "\n${RED}[ERREUR CRITIQUE] : Aucun ticket Kerberos valide trouvé pour $(whoami).${NC}"
+        echo -e "${RED}Veuillez exécuter 'kinit' avant de relancer le script.${NC}"
+        exit 1
+    fi
+
     echo -e "\n${YELLOW}[Exécution] : ${description}...${NC}"
     echo "--------------------------------------------------" >> $LOG_FILE
     echo "Playbook: $playbook_path" >> $LOG_FILE
     echo "Début: $(date)" >> $LOG_FILE
-    
+
+    # Forçage de la configuration locale pour les collections
+    export ANSIBLE_CONFIG="$(pwd)/ansible.cfg"
+
     ansible-playbook -i inventory.yml "$playbook_path" >> $LOG_FILE 2>&1
-    
+
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}[OK] : ${description} terminé avec succès.${NC}"
         echo "Résultat: SUCCESS" >> $LOG_FILE
