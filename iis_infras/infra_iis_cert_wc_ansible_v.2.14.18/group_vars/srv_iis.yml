@@ -1,6 +1,7 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/group_vars/srv_iis.yml
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/group_vars/
+# Fichier : srv_iis.yml
 # Informations Certificat (Double-Hop via OPT-FS01)
 # SÉCURISATION : Utilisation de quotes simples pour figer le chemin UNC Windows
 # ==============================================================================
