@@ -6,11 +6,13 @@
 
 # --- SECTION À ADAPTER POUR AUTRE CLIENT ------------------
 $TargetCN   = "*.optimedit.eu"  # Doit correspondre au CN de ton fichier .inf
-$FqdnCa     = "OPT-DC02.optimedit.eu"  
-$CaName     = "Optimedit-CA2"   # Corrigé d'après tes logs de certification actifs
-$InfPath    = "C:\Scripts\ADCS\IIS-WC\Application-IIS-SAN-Certificat-WC.inf"    
+$FqdnCa     = "DC03.optimedit.eu"  
+$CaName     = "Optimedit-CA3"   # Corrigé d'après tes logs de certification actifs
+$InfPath    = "C:\Scripts\ADCS\01.Methode-cert-iis-WC-PFX\Application-IIS-Certificat-WC.inf"    
 $ClearPwd   = "Dr/*-101977"     # Ton mot de passe sécurisé automatisé
 # ----------------------------------------------------------
+
+Test-Path $InfPath 
 
 Write-Host "--- PRÉPARATION DU FICHIER CONFIGURATION ---" -ForegroundColor Cyan
 
