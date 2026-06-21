@@ -40,7 +40,7 @@ DESTINATIONS=("$LOCAL_PATH" "$SYS_PATH")
 
 for DEST in "${DESTINATIONS[@]}"; do
     echo -e "${BLUE}🔄 Installation dans : ${GREEN}${DEST}${NC}"
-    
+
     # Si c'est le dossier système, on utilise sudo, sinon installation locale directe
     if [[ "$DEST" == "$SYS_PATH" ]]; then
         sudo ansible-galaxy collection install -r "$REQ_YML" -p "$DEST" --force > /dev/null 2>&1
