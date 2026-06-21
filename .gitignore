@@ -15,7 +15,8 @@
 **/deploy_execution.log
 
 # Ignorer les fichiers potentiellement sensibles (Vault)
-*vault*.yml
+# dans ce contexte de PoC on laisse ces fichiers sortir vers GitHub en commentant la ligne suivante
+#*vault*.yml
 
 # Ignorer les rapports d'audit CSV dans tous les sous-projets
 **/00.00.audit_winrm_certs/csv_result/*.csv
