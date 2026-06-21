@@ -1,0 +1,1227 @@
+Début de l'exécution : dim. 21 juin 2026 18:12:41 CEST
+--------------------------------------------------
+Playbook: 00.00.play_all_interne_create_host_vars_file.yml
+Début: dim. 21 juin 2026 18:12:41 CEST
+
+PLAY [PROVISIONING - Génération automatique des fichiers host_vars] ************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [AUTO-CONFIG - Écriture du fichier host_vars avec droits explicites] ******
+ok: [OPT-IIS-01.optimedit.eu -> localhost]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:12:55 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.01.play_iis_dc_create_users_applications.yml
+Début: dim. 21 juin 2026 18:12:55 CEST
+[WARNING]: Collection microsoft.ad does not support Ansible version 2.14.18
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [DC - Provisioning des comptes et configuration AD] ***********************
+
+TASK [dc_setup : AD -01- Création de l'OU pour les comptes de service] *********
+ok: [DC03.optimedit.eu]
+
+TASK [dc_setup : AD -02- Création des comptes de service applicatifs] **********
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_direction'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_comptabilite'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_paie'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_rh'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_ce'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_it'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_production'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_formation'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_achat'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_commercial'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_client'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_juridique'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_blog'})
+
+TASK [dc_setup : AD -03- Force l'activation de la transition de protocole (Native)] ***
+changed: [DC03.optimedit.eu] => (item=OPT-IIS-01.optimedit.eu)
+
+TASK [dc_setup : AD -04- Configuration des SPN HTTP pour les identités applicatives] ***
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_direction'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_comptabilite'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_paie'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_rh'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_ce'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_it'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_production'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_formation'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_achat'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_commercial'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_client'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_juridique'})
+changed: [DC03.optimedit.eu] => (item={'name': 'svc_blog'})
+
+TASK [dc_setup : AD -05- S'assurer que le compte Ansible n'est pas protégé contre la délégation] ***
+changed: [DC03.optimedit.eu]
+
+PLAY [IIS - Rafraîchissement du cache Kerberos et Test de délégation] **********
+
+TASK [Maintenance - Purge des tickets Kerberos (Session SYSTEM et User)] *******
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [Validation - Test d'accès SMB sous le contexte NT AUTHORITY\SYSTEM] ******
+ok: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+DC03.optimedit.eu          : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+OPT-IIS-01.optimedit.eu    : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:15:23 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.02.play_iis_dc_setup_dns.yml
+Début: dim. 21 juin 2026 18:15:23 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [Configuration des enregistrements DNS pour IIS] **************************
+
+TASK [Chargement des variables applicatives IIS (Liste des 13 sites)] **********
+ok: [DC03.optimedit.eu]
+
+TASK [DNS - Création/Mise à jour des records A (Round Robin)] ******************
+ok: [DC03.optimedit.eu] => (item=[{'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'}, 'OPT-IIS-01.optimedit.eu'])
+ok: [DC03.optimedit.eu] => (item=[{'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'}, 'OPT-IIS-01.optimedit.eu'])
+
+TASK [Recapitulatif DNS] *******************************************************
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu] => (item=[{'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'}, 'OPT-IIS-01.optimedit.eu']) 
+skipping: [DC03.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+DC03.optimedit.eu          : ok=2    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:16:42 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.03.play_iis_dc_ad_group.yml
+Début: dim. 21 juin 2026 18:16:42 CEST
+[WARNING]: Collection microsoft.ad does not support Ansible version 2.14.18
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [AD - Création du groupe de sécurité pour les comptes IIS] ****************
+
+TASK [AD - Création du groupe global via variable all.yml] *********************
+ok: [DC03.optimedit.eu]
+
+TASK [AD - Collecte propre des comptes svc_* via PowerShell] *******************
+changed: [DC03.optimedit.eu]
+
+TASK [AD - Liaison des comptes svc_* au groupe via variable all.yml] ***********
+ok: [DC03.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+DC03.optimedit.eu          : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:16:57 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.04.play_iis_dc_ad_spn.yml
+Début: dim. 21 juin 2026 18:16:57 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+[WARNING]: Collection community.windows does not support Ansible version
+2.14.18
+
+PLAY [AD - Déploiement et Application des Vrais SPN Applicatifs] ***************
+
+TASK [SPN - Copie du script PowerShell de remédiation depuis les fichiers du rôle] ***
+changed: [DC03.optimedit.eu]
+
+TASK [SPN - Création de la tâche planifiée avec élévation de privilèges AD] ****
+changed: [DC03.optimedit.eu]
+
+TASK [SPN - Déclenchement forcé de la tâche planifiée] *************************
+changed: [DC03.optimedit.eu]
+
+TASK [SPN - Temporisation pour exécution du traitement AD] *********************
+Pausing for 10 seconds
+(ctrl+C then 'C' = continue early, ctrl+C then 'A' = abort)
+ok: [DC03.optimedit.eu]
+
+TASK [SPN - Nettoyage de la tâche planifiée sur le DC] *************************
+changed: [DC03.optimedit.eu]
+
+TASK [SPN - Nettoyage du script PowerShell temporaire sur le DC] ***************
+changed: [DC03.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+DC03.optimedit.eu          : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:17:38 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.05.play_iis_test_kerberos_delegation_smb_write.yml
+Début: dim. 21 juin 2026 18:17:38 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS - Validation de la Délégation Kerberos et Test d'Écriture SMB] *******
+
+TASK [KERBEROS - Purge des tickets (Session SYSTEM et Contexte Courant)] *******
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [KERBEROS - Test d'accès ÉCRITURE SMB via Tâche Planifiée SYSTEM] *********
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [KERBEROS - Lecture du fichier de diagnostic persistant] ******************
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [KERBEROS - Affichage du Rapport de Diagnostic Restitué] ******************
+ok: [OPT-IIS-01.optimedit.eu] => {
+    "msg": [
+        "====================================================",
+        "--- RAPPORT DE DIAGNOSTIC KERBEROS SYSTEM ---",
+        "====================================================",
+        "Date execution : 06/21/2026 18:17:44",
+        "Serveur IIS    : OPT-IIS-01",
+        "Cible FS UNC   : '..\\\\OPT-FS03.optimedit.eu\\Partage'",
+        "STATUS RESULTAT: CRITICAL - ÉCHEC DOUBLE-HOP",
+        "Message Erreur : Le chemin réseau '..\\\\OPT-FS03.optimedit.eu\\Partage' n'est pas résolu ou inaccessible par SYSTEM.",
+        "Note           : Impossible de joindre ou d'écrire sur le stockage distant via Kerberos.",
+        "===================================================="
+    ]
+}
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:17:51 CEST
+--------------------------------------------------
+Playbook: 01.00.plays_ad_dns_delegation_spn/01.07.play_iis_maintenance_audit_applications_SPN_HTTP.yml
+Début: dim. 21 juin 2026 18:17:51 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [MAINTENANCE - Audit des SPN HTTP Active Directory] ***********************
+
+TASK [Chargement des variables applicatives IIS (Liste des 13 sites)] **********
+ok: [DC03.optimedit.eu]
+
+TASK [AUDIT - Analyse des SPN pour chaque application] *************************
+changed: [DC03.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [DC03.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [DC03.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [DC03.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [DC03.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [DC03.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [DC03.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [DC03.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [DC03.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [DC03.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [DC03.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [DC03.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [DC03.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [AFFICHAGE - Rapport de conformité des SPN HTTP] **************************
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "direction"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "direction"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "direction"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [direction] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:17:55.929349', 'end': '2026-06-21 16:17:56.810039', 'delta': '0:00:00.880689', 'stdout_lines': ['Application: [direction] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [direction] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "comptabilite"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "comptabilite"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "comptabilite"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [comptabilite] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:00.595770', 'end': '2026-06-21 16:18:01.484774', 'delta': '0:00:00.889004', 'stdout_lines': ['Application: [comptabilite] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [comptabilite] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "paie"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "paie"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "paie"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [paie] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:05.221869', 'end': '2026-06-21 16:18:06.082693', 'delta': '0:00:00.860823', 'stdout_lines': ['Application: [paie] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [paie] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "rh"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "rh"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "rh"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [rh] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:09.870557', 'end': '2026-06-21 16:18:10.716439', 'delta': '0:00:00.845882', 'stdout_lines': ['Application: [rh] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [rh] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "ce"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "ce"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "ce"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [ce] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:14.485875', 'end': '2026-06-21 16:18:15.374729', 'delta': '0:00:00.888853', 'stdout_lines': ['Application: [ce] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [ce] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "it"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "it"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "it"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [it] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:19.180133', 'end': '2026-06-21 16:18:20.051403', 'delta': '0:00:00.871269', 'stdout_lines': ['Application: [it] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [it] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "production"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "production"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "production"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [production] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:23.846998', 'end': '2026-06-21 16:18:24.720979', 'delta': '0:00:00.873981', 'stdout_lines': ['Application: [production] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [production] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "formation"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "formation"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "formation"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [formation] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:28.500858', 'end': '2026-06-21 16:18:29.353991', 'delta': '0:00:00.853133', 'stdout_lines': ['Application: [formation] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [formation] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "achat"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "achat"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "achat"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [achat] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:33.156967', 'end': '2026-06-21 16:18:34.004244', 'delta': '0:00:00.847277', 'stdout_lines': ['Application: [achat] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [achat] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "commercial"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "commercial"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "commercial"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [commercial] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:37.809496', 'end': '2026-06-21 16:18:38.703898', 'delta': '0:00:00.894401', 'stdout_lines': ['Application: [commercial] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [commercial] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "client"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "client"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "client"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [client] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:42.473684', 'end': '2026-06-21 16:18:43.376544', 'delta': '0:00:00.902859', 'stdout_lines': ['Application: [client] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [client] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "juridique"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "juridique"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "juridique"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [juridique] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:47.109354', 'end': '2026-06-21 16:18:47.989005', 'delta': '0:00:00.879651', 'stdout_lines': ['Application: [juridique] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [juridique] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+ok: [DC03.optimedit.eu] => (item={'changed': True, 'invocation': {'module_args': {'cmd': '$AppName = "blog"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', '_raw_params': '$AppName = "blog"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"\n', 'chdir': None, 'no_profile': False, 'creates': None, 'executable': None, 'removes': None, 'output_encoding_override': None, 'stdin': None}}, 'cmd': '$AppName = "blog"\n$Account = "svc_$AppName"\n\n# Récupération sécurisée de l\'attribut ServicePrincipalNames du compte AD\n$User = Get-ADUser -Filter "SamAccountName -eq \'$Account\'" -Properties ServicePrincipalNames\n\nif (-not $User) {\n    Write-Output "Application: [$AppName] -> ERREUR: Compte AD \'$Account\' introuvable."\n    return\n}\n\n$Spns = $User.ServicePrincipalNames\n\n# Définition des patterns à tester\n$VraiSpnLong   = "http/$AppName.optimedit.eu"\n$VraiSpnShort  = "http/$AppName"\n$AncienSpnLong = "http/svc_$AppName.optimedit.eu"\n\n# Évaluation de la conformité Kerberos de production\n$StatusVrai = if (($Spns -contains $VraiSpnLong) -and ($Spns -contains $VraiSpnShort)) {\n    "VALIDE (Kerberos Cible OK)"\n} else {\n    "MANQUANT (ERREUR PRODUCTION)"\n}\n\n# Détection des restes de l\'ancienne configuration\n$StatusAncien = if ($Spns -contains $AncienSpnLong) {\n    "PRESENT (A NETTOYER)"\n} else {\n    "ABSENT (PROPRE)"\n}\n\nWrite-Output "Application: [$AppName] -> Statut Production: $StatusVrai | Ancien SPN erroné: $StatusAncien"', 'stdout': 'Application: [blog] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)\r\n', 'stderr': '', 'rc': 0, 'start': '2026-06-21 16:18:51.903239', 'end': '2026-06-21 16:18:52.730951', 'delta': '0:00:00.827711', 'stdout_lines': ['Application: [blog] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)'], 'stderr_lines': [], 'failed': False, 'item': {'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'}, 'ansible_loop_var': 'item'}) => {
+    "msg": [
+        "Application: [blog] -> Statut Production: VALIDE (Kerberos Cible OK) | Ancien SPN erroné: ABSENT (PROPRE)"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+DC03.optimedit.eu          : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:18:53 CEST
+--------------------------------------------------
+Playbook: 02.00.plays_install_iis_pool_http/02.01.play_iis_install_http.yml
+Début: dim. 21 juin 2026 18:18:53 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+[WARNING]: Collection community.windows does not support Ansible version
+2.14.18
+[DEPRECATION WARNING]: community.windows.win_iis_webapppool has been 
+deprecated. Use microsoft.iis.web_app_pool instead. This feature will be 
+removed from community.windows in version 4.0.0. Deprecation warnings can be 
+disabled by setting deprecation_warnings=False in ansible.cfg.
+[DEPRECATION WARNING]: community.windows.win_iis_website has been deprecated. 
+Use microsoft.iis.website instead. This feature will be removed from 
+community.windows in version 4.0.0. Deprecation warnings can be disabled by 
+setting deprecation_warnings=False in ansible.cfg.
+[DEPRECATION WARNING]: community.windows.win_iis_webbinding has been 
+deprecated. Use microsoft.iis.website instead. This feature will be removed 
+from community.windows in version 4.0.0. Deprecation warnings can be disabled 
+by setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [Préparation et Déploiement des 13 sites HTTP] ****************************
+
+TASK [iis_setup : PURGE -00a- Suppression de tous les anciens sites (Site_*)] ***
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : PURGE -00b- Suppression de tous les anciens Application Pools (Pool_*)] ***
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : INSTALL -01- Installation de IIS et des outils de gestion] ***
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : REBOOT -02- Redémarrage si nécessaire] ***********************
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : FEU -03- Ouverture des ports HTTP/HTTPS] *********************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04a- Copie locale du certificat PFX via privilèges SYSTEM] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04b- Importation du certificat PFX (Source Locale)] ****
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04c- Nettoyage du fichier PFX local temporaire] ********
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : INFRA -05a- Création des dossiers] ***************************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : INFRA -05b- Configuration explicite des Application Pools] ***
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SITE -06- Port dédié et assignation au Pool] *****************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : BINDING -07- Ajout HostHeader Port 80] ***********************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SÉCURITÉ -07a- Déverrouiller la section de configuration Anonyme au niveau global] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : SÉCURITÉ -07b- Configurer l'authentification anonyme pour utiliser l'identité du Pool] ***
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SSL -08- Configuration SNI Port 443] *************************
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'}) 
+skipping: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'}) 
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : RESTART -09- Redémarrage pour prise en compte] ***************
+skipping: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=11   changed=4    unreachable=0    failed=0    skipped=5    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:21:14 CEST
+--------------------------------------------------
+Playbook: 02.00.plays_install_iis_pool_http/02.02.play_iis_generate_index.html.yml
+Début: dim. 21 juin 2026 18:21:14 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [Validation finale des sites IIS] *****************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [Sécurité - S'assurer que les dossiers de destination existent] ***********
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [Génération des pages index.html de test (Comparaison Hostnames)] *********
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:21:52 CEST
+--------------------------------------------------
+Playbook: 03.00.plays_conf_https_443_ports_dedies/03.01.play_iis_flush_ssl_before_config.yml
+Début: dim. 21 juin 2026 18:21:52 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+[WARNING]: Collection community.windows does not support Ansible version
+2.14.18
+[DEPRECATION WARNING]: community.windows.win_iis_website has been deprecated. 
+Use microsoft.iis.website instead. This feature will be removed from 
+community.windows in version 4.0.0. Deprecation warnings can be disabled by 
+setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [IIS - Flush SSL et Nettoyage Global] *************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [1. Nettoyage complet des liaisons HTTPS existantes sur port 443 des sites métiers] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [1b. Suppression du site IIS par défaut] **********************************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [2. Nettoyage DYNAMIQUE des SslBindings orphelins (HTTP.sys)] *************
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [3. Nettoyage Radical : Suppression liaison IP Port 0.0.0.0:443] **********
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [4. Redémarrage du service Web pour purger la mémoire] ********************
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=6    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:22:45 CEST
+--------------------------------------------------
+Playbook: 03.00.plays_conf_https_443_ports_dedies/03.02.play_iis_ssl_https.yml
+Début: dim. 21 juin 2026 18:22:45 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+[WARNING]: Collection community.windows does not support Ansible version
+2.14.18
+[DEPRECATION WARNING]: community.windows.win_iis_webapppool has been 
+deprecated. Use microsoft.iis.web_app_pool instead. This feature will be 
+removed from community.windows in version 4.0.0. Deprecation warnings can be 
+disabled by setting deprecation_warnings=False in ansible.cfg.
+[DEPRECATION WARNING]: community.windows.win_iis_website has been deprecated. 
+Use microsoft.iis.website instead. This feature will be removed from 
+community.windows in version 4.0.0. Deprecation warnings can be disabled by 
+setting deprecation_warnings=False in ansible.cfg.
+[DEPRECATION WARNING]: community.windows.win_iis_webbinding has been 
+deprecated. Use microsoft.iis.website instead. This feature will be removed 
+from community.windows in version 4.0.0. Deprecation warnings can be disabled 
+by setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [Configuration SSL pour les 13 sites] *************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : PURGE -00a- Suppression de tous les anciens sites (Site_*)] ***
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : PURGE -00b- Suppression de tous les anciens Application Pools (Pool_*)] ***
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : INSTALL -01- Installation de IIS et des outils de gestion] ***
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : REBOOT -02- Redémarrage si nécessaire] ***********************
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : FEU -03- Ouverture des ports HTTP/HTTPS] *********************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04a- Copie locale du certificat PFX via privilèges SYSTEM] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04b- Importation du certificat PFX (Source Locale)] ****
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : CERT -04c- Nettoyage du fichier PFX local temporaire] ********
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : INFRA -05a- Création des dossiers] ***************************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : INFRA -05b- Configuration explicite des Application Pools] ***
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SITE -06- Port dédié et assignation au Pool] *****************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : BINDING -07- Ajout HostHeader Port 80] ***********************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SÉCURITÉ -07a- Déverrouiller la section de configuration Anonyme au niveau global] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [iis_setup : SÉCURITÉ -07b- Configurer l'authentification anonyme pour utiliser l'identité du Pool] ***
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : SSL -08- Configuration SNI Port 443] *************************
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [iis_setup : RESTART -09- Redémarrage pour prise en compte] ***************
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=14   changed=6    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:25:51 CEST
+--------------------------------------------------
+Playbook: 03.00.plays_conf_https_443_ports_dedies/03.03.play_iis_hardening_port_dedies_ssl_flush.yml
+Début: dim. 21 juin 2026 18:25:51 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [HARDENING - Flush et nettoyage des anomalies sur ports dédiés] ***********
+
+TASK [1. FLUSH IIS - Suppression des liaisons HTTP/HTTPS corrompues ou mal configurées] ***
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [2. FLUSH HTTP.SYS - Purge des certificats orphelins ou mal mappés] *******
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [3. Redémarrage de sécurité du service Web (W3SVC)] ***********************
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=3    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:27:23 CEST
+--------------------------------------------------
+Playbook: 03.00.plays_conf_https_443_ports_dedies/03.04.play_iis_hardening_port_dedies_ssl_conf.yml
+Début: dim. 21 juin 2026 18:27:23 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [HARDENING - Configuration SSL sur les ports dédiés] **********************
+
+TASK [1. CONFIGURATION HTTPS - Création de la liaison sécurisée avec Host Header] ***
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [2. Redémarrage final pour validation de la configuration HTTPS] **********
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:28:05 CEST
+--------------------------------------------------
+Playbook: 04.00.plays_pool_indentity_svc_acl_ntfs/04.01.play_iis_hardening_pool_svc.yml
+Début: dim. 21 juin 2026 18:28:05 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+[WARNING]: Collection community.windows does not support Ansible version
+2.14.18
+[DEPRECATION WARNING]: community.windows.win_iis_webapppool has been 
+deprecated. Use microsoft.iis.web_app_pool instead. This feature will be 
+removed from community.windows in version 4.0.0. Deprecation warnings can be 
+disabled by setting deprecation_warnings=False in ansible.cfg.
+
+PLAY [HARDENING - Application Pools & Identités AD] ****************************
+
+TASK [SÉCURITÉ - Autoriser le groupe global à ouvrir une session en tant que service] ***
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [SÉCURITÉ - Rafraîchissement des privilèges système] **********************
+skipping: [OPT-IIS-01.optimedit.eu]
+
+TASK [POOL - Configuration de l'identité AD et du profil] **********************
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu] => (item=None)
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [SÉCURITÉ - Arrêt et désactivation du DefaultAppPool] *********************
+ok: [OPT-IIS-01.optimedit.eu]
+
+TASK [SÉCURITÉ - Forcer le DefaultAppPool à ne démarrer aucun worker] **********
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=4    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:28:32 CEST
+--------------------------------------------------
+Playbook: 04.00.plays_pool_indentity_svc_acl_ntfs/04.02.play_iis_acl_applications.yml
+Début: dim. 21 juin 2026 18:28:32 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [HARDENING - Configuration Forcée des ACL NTFS] ***************************
+
+TASK [HARDENING - Rupture de l'héritage et purge absolue] **********************
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [SÉCURITÉ - Réattribution du SYSTEM local] ********************************
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [SÉCURITÉ - Réattribution du groupe Administrateurs local (SID: S-1-5-32-544)] ***
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+TASK [NTFS - Attribution des droits d'accès pour le compte de service] *********
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+ok: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:30:31 CEST
+--------------------------------------------------
+Playbook: 04.00.plays_pool_indentity_svc_acl_ntfs/04.03.iis.test_dir_acl_apps_Use_--limit_cible.yml
+Début: dim. 21 juin 2026 18:30:31 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [AUDIT - Vérification de la conformité des ACL NTFS] **********************
+
+TASK [AUDIT - Collecte et analyse des permissions NTFS via script dynamique] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [AUDIT - Validation des règles de conformité (Hardening Check)] ***********
+ok: [OPT-IIS-01.optimedit.eu] => (item=achat) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_achat"
+        },
+        "Application": "achat",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [achat] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=blog) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_blog"
+        },
+        "Application": "blog",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [blog] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=ce) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_ce"
+        },
+        "Application": "ce",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [ce] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=client) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_client"
+        },
+        "Application": "client",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [client] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=commercial) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_commercial"
+        },
+        "Application": "commercial",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [commercial] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=comptabilite) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_comptabilite"
+        },
+        "Application": "comptabilite",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [comptabilite] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=direction) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_direction"
+        },
+        "Application": "direction",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [direction] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=formation) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_formation"
+        },
+        "Application": "formation",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [formation] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=it) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_it"
+        },
+        "Application": "it",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [it] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=juridique) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_juridique"
+        },
+        "Application": "juridique",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [juridique] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=paie) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_paie"
+        },
+        "Application": "paie",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [paie] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=production) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_production"
+        },
+        "Application": "production",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [production] est correctement isolée (Modify, Synchronize)."
+}
+ok: [OPT-IIS-01.optimedit.eu] => (item=rh) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "Account": {
+            "Value": "OPTIMEDIT\\svc_rh"
+        },
+        "Application": "rh",
+        "InheritanceFlags": "ContainerInherit, ObjectInherit",
+        "IsInherited": false,
+        "Rights": "Modify, Synchronize"
+    },
+    "msg": "CONFORME : L'application [rh] est correctement isolée (Modify, Synchronize)."
+}
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:30:36 CEST
+--------------------------------------------------
+Playbook: 05.00.plays_pools_recycling_maintenances/05.01.play_iis_maintenance_AHH_AHS_Local_Keys_aspnet_regiis.yml
+Début: dim. 21 juin 2026 18:30:36 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS MAINTENANCE - Gestion et Renouvellement des Clés de Chiffrement IIS] ***
+
+TASK [MAINTENANCE IIS - Renouvellement des clés locales [IISConfigurationKey] et [iisWasKey] (Event ID 9009)] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:30:40 CEST
+--------------------------------------------------
+Playbook: 05.00.plays_pools_recycling_maintenances/05.02.play_iis_maintenance_enable_recycling_logs.yml
+Début: dim. 21 juin 2026 18:30:40 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS MAINTENANCE - Activation des logs de recyclage] **********************
+
+TASK [LOGS - Configuration du logging Event Log pour chaque pool applicatif] ***
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:31:30 CEST
+--------------------------------------------------
+Playbook: 05.00.plays_pools_recycling_maintenances/05.03.play_iis_maintenance_configure_nightly_recycle.yml
+Début: dim. 21 juin 2026 18:31:30 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS MAINTENANCE - Configuration du recyclage nocturne des Pools] *********
+
+TASK [PLANIFICATION - Purge et configuration de l'horaire fixe à 03:00:00] *****
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'direction', 'port': 8060, 'path': 'c:\\apps_optimedit\\direction', 'user': 'OPTIMEDIT\\svc_direction'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'comptabilite', 'port': 8061, 'path': 'c:\\apps_optimedit\\comptabilite', 'user': 'OPTIMEDIT\\svc_comptabilite'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'paie', 'port': 8062, 'path': 'c:\\apps_optimedit\\paie', 'user': 'OPTIMEDIT\\svc_paie'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'rh', 'port': 8063, 'path': 'c:\\apps_optimedit\\rh', 'user': 'OPTIMEDIT\\svc_rh'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'ce', 'port': 8064, 'path': 'c:\\apps_optimedit\\ce', 'user': 'OPTIMEDIT\\svc_ce'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'it', 'port': 8065, 'path': 'c:\\apps_optimedit\\it', 'user': 'OPTIMEDIT\\svc_it'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'production', 'port': 8066, 'path': 'c:\\apps_optimedit\\production', 'user': 'OPTIMEDIT\\svc_production'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'formation', 'port': 8067, 'path': 'c:\\apps_optimedit\\formation', 'user': 'OPTIMEDIT\\svc_formation'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'achat', 'port': 8068, 'path': 'c:\\apps_optimedit\\achat', 'user': 'OPTIMEDIT\\svc_achat'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'commercial', 'port': 8069, 'path': 'c:\\apps_optimedit\\commercial', 'user': 'OPTIMEDIT\\svc_commercial'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'client', 'port': 8070, 'path': 'c:\\apps_optimedit\\client', 'user': 'OPTIMEDIT\\svc_client'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'juridique', 'port': 8071, 'path': 'c:\\apps_optimedit\\juridique', 'user': 'OPTIMEDIT\\svc_juridique'})
+changed: [OPT-IIS-01.optimedit.eu] => (item={'name': 'blog', 'port': 8072, 'path': 'c:\\apps_optimedit\\blog', 'user': 'OPTIMEDIT\\svc_blog'})
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:32:49 CEST
+--------------------------------------------------
+Playbook: 05.00.plays_pools_recycling_maintenances/05.04.play_iis_audit_pools_recycling_status.yml
+Début: dim. 21 juin 2026 18:32:49 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS AUDIT - Rapport de configuration du recyclage] ***********************
+
+TASK [AUDIT - Récupération de la configuration courante dans IIS] **************
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [📊 RAPPORT SYNTHÉTIQUE DES POOLS IIS] ************************************
+ok: [OPT-IIS-01.optimedit.eu] => {
+    "msg": [
+        "Pool: [DefaultAppPool] -> Pas de recyclage fixe défini | Intervalle actif : ",
+        "Pool: [Pool_achat] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_blog] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_ce] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_client] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_commercial] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_comptabilite] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_direction] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_formation] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_it] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_juridique] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_paie] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_production] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : ",
+        "Pool: [Pool_rh] -> Recyclage fixe à 03:00:00 | Intervalle de sécurité : "
+    ]
+}
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:32:53 CEST
+--------------------------------------------------
+Playbook: 05.00.plays_pools_recycling_maintenances/05.05.play_iis_audit_was_activity_logs.yml
+Début: dim. 21 juin 2026 18:32:53 CEST
+[WARNING]: Collection ansible.windows does not support Ansible version 2.14.18
+
+PLAY [IIS AUDIT - Rapport d'activité du service de gestion WAS] ****************
+
+TASK [AUDIT - Extraction des derniers logs de vie du service WAS (Journal System)] ***
+changed: [OPT-IIS-01.optimedit.eu]
+
+TASK [📊 DERNIERS ÉVÉNEMENTS WAS DÉTECTÉS] *************************************
+ok: [OPT-IIS-01.optimedit.eu] => {
+    "msg": [
+        "[2026-06-21 12:04:27] ID 5211 (DEMARRAGE SERVICE) - Le service d’activation de processus Windows (WAS) a démarré avec le mode « Classic » en utilisant « ConfigurationSystem »",
+        "[2026-06-20 11:16:48] ID 5211 (DEMARRAGE SERVICE) - Le service d’activation de processus Windows (WAS) a démarré avec le mode « Classic » en utilisant « ConfigurationSystem »",
+        "[2026-06-19 20:34:11] ID 5211 (DEMARRAGE SERVICE) - Le service d’activation de processus Windows (WAS) a démarré avec le mode « Classic » en utilisant « ConfigurationSystem »",
+        "[2026-06-19 20:22:36] ID 5211 (DEMARRAGE SERVICE) - Le service d’activation de processus Windows (WAS) a démarré avec le mode « Classic » en utilisant « ConfigurationSystem »"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+OPT-IIS-01.optimedit.eu    : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Résultat: SUCCESS
+Fin: dim. 21 juin 2026 18:33:02 CEST
+Fin globale de l'exécution : dim. 21 juin 2026 18:33:02 CEST

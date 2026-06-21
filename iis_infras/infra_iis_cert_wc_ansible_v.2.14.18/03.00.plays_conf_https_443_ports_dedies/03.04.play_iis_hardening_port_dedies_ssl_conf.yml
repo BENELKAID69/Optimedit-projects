@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/03.00.plays_conf_https_443_ports_dedies
 # Fichier      : 03.04.play_iis_hardening_port_dedies_ssl_conf.yml
 # Description  :         
 # ==============================================================================

@@ -2,7 +2,8 @@
 # ==============================================================================
 # CONFIGURATION GLOBALE DES VARIABLES (ANSIBLE GROUP_VARS)
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_cert_wc_ansible_v.2.14.18/group_vars/all.yml
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/group_vars/
+# fichier : all.yml
 # ==============================================================================
 
 # ------------------------------------------------------------------------------

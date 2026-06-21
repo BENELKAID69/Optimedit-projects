@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
 # Fichier      : 04.01.play_iis_hardening_pool_svc.yml
 # Description  : Configuration sécurisée des Application Pools IIS avec identités AD        
 # ==============================================================================

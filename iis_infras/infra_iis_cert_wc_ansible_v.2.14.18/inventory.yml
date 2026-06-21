@@ -23,6 +23,6 @@ all:
     srv_iis:
       hosts:
         #OPT-IIS-[01:11].optimedit.eu:
-        OPT-IIS-0[1:6].optimedit.eu:
+        # OPT-IIS-0[1:6].optimedit.eu:
         #OPT-IIS-1[2:3].optimedit.eu:
-        # OPT-IIS-01.optimedit.eu:
+         OPT-IIS-01.optimedit.eu:

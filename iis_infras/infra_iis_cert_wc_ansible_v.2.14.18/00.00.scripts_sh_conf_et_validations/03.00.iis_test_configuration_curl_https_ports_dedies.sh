@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/00.00.scripts_sh_conf_et_validations
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs/00.00.scripts_sh_conf_et_validations
 # Fichier      : 03.00.iis_test_configuration_curl_https_ports_dedies.sh
 # Description : Recette HTTPS sur ports dédiés spécifiques (Hardening IIS)
 # Date : 29/05/2026

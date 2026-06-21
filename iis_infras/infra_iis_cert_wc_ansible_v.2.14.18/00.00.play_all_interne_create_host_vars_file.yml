@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18
 # Fichier : 00.00.play_all_interne_create_host_vars_file.yml
 # Description: Génération automatique des fichiers host_vars
 # ==============================================================================

@@ -1,7 +1,7 @@
 #!/bin/bash
 # A executer sur le Master Ansible
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/00.00.audit_winrm_certs
 # Fichier      : audit_dynamique_winrm_certs_with_host_vars.sh
 # ==============================================================================
 # --- Détection dynamique du dossier du script et création du sous-dossier CSV ---

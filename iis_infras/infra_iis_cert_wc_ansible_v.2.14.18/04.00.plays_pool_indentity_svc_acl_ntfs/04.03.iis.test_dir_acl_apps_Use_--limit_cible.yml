@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
 # Fichier      : 04.03.iis.test_dir_acl_apps_Use_--limit_cible.yml
 # Description  : Playbook d'Audit et de Validation de Conformité NTFS pour les applications IIS.
 #                Analyse dynamiquement les permissions et valide le Hardening.

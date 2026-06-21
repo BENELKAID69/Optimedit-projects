@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
 # Fichier      : 01.02.play_iis_dc_setup_dns.yml
 # Description  :          
 # ==============================================================================

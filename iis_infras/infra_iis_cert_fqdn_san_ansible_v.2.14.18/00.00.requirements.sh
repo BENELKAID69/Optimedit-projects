@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_fqdn_san_ansible_v.2.14.18
 # NOM DU SCRIPT : 00.00.requirements.sh
 # CONFIGURATION : Installation double (Système + Local) des collections Ansible
 #                 & Restauration des droits collaboratifs (SGID)

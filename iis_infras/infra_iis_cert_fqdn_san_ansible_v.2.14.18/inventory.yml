@@ -1,5 +1,6 @@
 ---
-# Emplacement : /projet_optimedit/Git/inventory.yml
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_fqdn_san_ansible_v.2.14.18/
+# Fichier: inventory.yml
 all:
   children:
     srv_dc:

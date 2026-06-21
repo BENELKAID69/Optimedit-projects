@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/04.00.plays_pool_indentity_svc_acl_ntfs
 # Fichier      : 04.02.play_iis_acl_applications.yml
 # Description  : Hardening NTFS radical (Coupure héritage + Purge      
 # ==============================================================================

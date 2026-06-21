@@ -1,6 +1,6 @@
 ---
 # ==============================================================================
-# Emplacement  : /projets_optimedit/infra_iis_ansible/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
 # Fichier      : 01.05.play_iis_test_kerberos_delegation_smb_write.yml
 # Description  : Playbook d'Audit - Validation de la Délégation Kerberos.
 #                Incorpore une pause de 5s pour permettre la validation visuelle
