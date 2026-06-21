@@ -68,7 +68,7 @@
           # Analyse du résultat écrit par SYSTEM
           if (Test-Path 'C:\Windows\Temp\krb_test.txt') {
               $Result = Get-Content -Path 'C:\Windows\Temp\krb_test.txt'
-              Remove-Item -Path 'C:\Windows\Temp\krb_test.txt' -Force
+               Remove-Item -Path 'C:\Windows\Temp\krb_test.txt' -Force
               
               if ($Result -eq 'SUCCESS') {
                   return @{ changed = false; msg = "Délégation Kerberos validée avec succès par SYSTEM vers $FS_Target" }

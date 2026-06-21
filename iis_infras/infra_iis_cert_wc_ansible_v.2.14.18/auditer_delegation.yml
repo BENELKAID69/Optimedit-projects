@@ -1,0 +1,18 @@
+---
+- name: "Audit complet des tickets Kerberos"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    - name: "KERBEROS - Récupération détaillée des tickets SYSTEM"
+      ansible.windows.win_shell: |
+        # Affichage complet des tickets pour le compte SYSTEM (0x3e7)
+        klist -li 0x3e7 | Out-String
+        Write-Host "--- Analyse des Tickets ---"
+        # Liste simplifiée des tickets actifs
+        klist tickets -li 0x3e7
+      register: audit_result
+
+    - name: "Affichage du résultat de l'audit"
+      ansible.builtin.debug:
+        msg: "{{ audit_result.stdout_lines }}"

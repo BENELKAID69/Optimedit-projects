@@ -1,11 +1,11 @@
 ---
 # ==============================================================================
 # Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/01.00.plays_ad_dns_delegation_spn
-# Fichier     : 01.05.play_iis_test_kerberos_delegation_smb_write.yml
-# Description : Playbook d'Audit - Validation de la Délégation Kerberos.
-#               Incorpore une pause de 5s pour permettre la validation visuelle
-#               du jeton réseau avant son auto-nettoyage.
-# Version : 3 (Optimisé avec diagnostic DNS et ACL)
+# Fichier      : 01.05.play_iis_test_kerberos_delegation_smb_write.yml
+# Description  : Playbook d'Audit - Validation de la Délégation Kerberos.
+#                Incorpore une pause de 5s pour permettre la validation visuelle
+#                du jeton réseau avant son auto-nettoyage.
+# Version : 2
 # ==============================================================================
 
 - name: "IIS - Validation de la Délégation Kerberos et Test d'Écriture SMB"
@@ -42,31 +42,26 @@
           # LOGIQUE INTERNE DE LA TÂCHE PLANIFIÉE
           $ScriptBlockStr = @"
           `$DebugInfo = @()
-          `$DebugInfo += "================================================================================"
+          `$DebugInfo += "===================================================="
           `$DebugInfo += "--- RAPPORT DE DIAGNOSTIC KERBEROS SYSTEM ---"
-          `$DebugInfo += "================================================================================"
+          `$DebugInfo += "===================================================="
           `$DebugInfo += "Date execution : $(Get-Date)"
           `$DebugInfo += "Serveur IIS    : `$env:COMPUTERNAME"
           `$DebugInfo += "Cible FS UNC   : '$FS_Target'"
 
-          # Diagnostic DNS Amélioré
-          try {
-              `$HostEntry = [System.Net.Dns]::GetHostEntry("{{ groups['srv_fs'][0] }}")
-              `$DebugInfo += "DEBUG: Résolution DNS OK pour {{ groups['srv_fs'][0] }}"
-          } catch {
-              `$DebugInfo += "CRITICAL - DNS: Impossible de résoudre {{ groups['srv_fs'][0] }} : `$(`$_.Exception.Message)"
-              throw
-          }
+          # Avant le Test-Path, ajoute cette ligne pour voir ce que le système voit
+          Write-Output "DEBUG: Test de résolution de {{ groups['srv_fs'][0] }}"
+          [System.Net.Dns]::GetHostEntry("{{ groups['srv_fs'][0] }}")
 
           try {
               # Étape 1 : Test de visibilité réseau du partage
               if (-not (Test-Path '$FS_Target')) {
-                  throw "CRITICAL - RÉSEAU: Le chemin réseau '$FS_Target' est inaccessible."
+                  throw "Le chemin réseau '$FS_Target' n'est pas résolu ou inaccessible par SYSTEM."
               }
 
               # Étape 2 : Tentative d'écriture physique via le Double-Hop Kerberos
               Set-Content -Path '$RemoteLogFile' -Value "SUCCESS : Ecriture Kerberos fonctionnelle" -ErrorAction Stop
-
+              
               # ==============================================================================
               # AJOUT D'UNE PAUSE DE 5 SECONDES POUR PERMETTRE LA VALIDATION MANUELLE
               # ==============================================================================
@@ -80,18 +75,14 @@
               `$DebugInfo += "STATUS RESULTAT: OK - SUCCÈS TOTAL"
               `$DebugInfo += "Détails        : Le jeton a été écrit, maintenu 5s, puis nettoyé avec succès."
               `$DebugInfo += "Validation     : Chaîne de délégation Kerberos 100% opérationnelle."
-          } catch [System.UnauthorizedAccessException] {
-              `$DebugInfo += "STATUS RESULTAT: CRITICAL - DROITS INSUFFISANTS (ACL/NTFS)"
-              `$DebugInfo += "Note           : L'accès au partage est refusé. Vérifiez les permissions du compte machine IIS."
-              throw
           } catch {
               `$DebugInfo += "STATUS RESULTAT: CRITICAL - ÉCHEC DOUBLE-HOP"
               `$DebugInfo += "Message Erreur : `$(`$_.Exception.Message)"
               `$DebugInfo += "Note           : Impossible de joindre ou d'écrire sur le stockage distant via Kerberos."
           }
 
-          `$DebugInfo += "==============================================================================="
-
+          `$DebugInfo += "===================================================="
+          
           # Écriture du rapport de conformité sur le serveur IIS
           Set-Content -Path '$DiagLog' -Value (`$DebugInfo -join "`r`n") -Force
           "@
@@ -103,7 +94,7 @@
           # Création et déclenchement de la tâche planifiée volatile sous SYSTEM
           $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -EncodedCommand $Encoded"
           $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-
+          
           $Task = Register-ScheduledTask -TaskName "{{ kerberos_task_name }}" -Action $Action -Principal $Principal
           Start-ScheduledTask -TaskName "{{ kerberos_task_name }}"
 
