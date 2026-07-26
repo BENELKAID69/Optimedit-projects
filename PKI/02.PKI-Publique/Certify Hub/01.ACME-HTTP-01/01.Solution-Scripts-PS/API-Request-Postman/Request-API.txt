@@ -1,0 +1,323 @@
+Les variables:
+hub_api_url	= https://api-rest.optimedit.eu:8443
+access_token	= sortie de requête 'POST {{hub_api_url}}/api/v1/auth/login' = "accessToken": " eyJ...DlU"
+instanceId	= 17dfbdd7-b834-4da0-8f3c-e18f8395b48a
+managedCertId	= f9712ad8-bd49-430c-8cff-370633369e53
+format		= pfx
+
+
+
+
+
+
+
+***************************** Requêtes client API ex: Postman *****************************
+
+Login :
+======
+POST {{hub_api_url}}/api/v1/auth/login
+
+Conf:
+01.Body = 
+{
+  "username": "admin",
+  "password": "Ici Password admin API HUB"
+}
+02.Script =
+
+-------
+const response = pm.response.json();
+if (response.isSuccess) {
+    pm.environment.set("access_token", response.accessToken);
+    pm.environment.set("refresh_token", response.refreshToken);
+    
+    const expiresInSeconds = 3600;
+    const expiryTimestamp = Date.now() + (expiresInSeconds * 1000);
+    pm.environment.set("token_expiry", expiryTimestamp);
+    
+    console.log("Token stocké, expire à :", new Date(expiryTimestamp).toLocaleTimeString());
+} else {
+    console.error("Login échoué :", response.detail);
+}
+------
+
+Vérification authentification, santé, version:
+=============================================
+GET {{hub_api_url}}/api/v1/auth/status
+GET {{hub_api_url}} /api/v1/system/health
+GET {{hub_api_url}} /api/v1/system/version
+
+
+Lister instance:
+==============
+GET {{hub_api_url}} /api/v1/hub/instances
+1
+
+Out
+[
+    {
+        "id": "17dfbdd7-b834-4da0-8f3c-e18f8395b48a",		------------------------- = instanceId
+        "displayTitle": "API-REST",
+        "description": "Primary Certify Manager Instance (Hub)",
+        "os": "Windows",
+        "osVersion": "Microsoft Windows 10.0.20348",
+        "clientName": "Certify Management Hub",
+        "clientVersion": "7.1.1.0",
+        "tags": [],
+        "dateLastReported": "2026-07-19T16:09:07.1269738+02:00"
+    }
+]
+
+Lister etat instance :
+=====================
+GET {{hub_api_url}}/internal/v1/certificate/{{instanceId}}/summary
+{
+    "instanceId": "17dfbdd7-b834-4da0-8f3c-e18f8395b48a",
+    "total": 1,
+    "healthy": 1,
+    "error": 0,
+    "warning": 0,
+    "awaitingUser": 0,
+    "invalidConfig": 0,
+    "noCertificate": 0,
+    "externallyManaged": 0,
+    "totalDomains": 1,
+    "lastUpdateId": 0,
+    "isChanged": true
+}
+
+
+Lister manage ID:
+===============
+{{hub_api_url}}/internal/v1/hub/items?instanceId={{instanceId}}
+{
+    "results": [
+        {
+            "instanceId": "17dfbdd7-b834-4da0-8f3c-e18f8395b48a",
+            "instanceTitle": "API-REST",
+            "os": "Windows",
+            "clientDetails": "Certify Management Hub",
+            "id": "f9712ad8-bd49-430c-8cff-370633369e53", ------------------------- = managedCertId
+            "title": "api-rest.optimedit.eu",
+            "identifiers": [
+                {
+                    "isAuthorizationPending": false,
+                    "status": "",
+                    "identifierType": "dns",
+                    "value": "api-rest.optimedit.eu"
+                }
+            ],
+            "primaryIdentifier": {
+                "isAuthorizationPending": false,
+                "status": "",
+                "identifierType": "dns",
+                "value": "api-rest.optimedit.eu"
+            },
+            "dateRenewed": "2026-07-17T18:38:26.5356562+00:00",
+            "dateExpiry": "2026-10-15T19:39:52+02:00",
+            "dateRetrieved": "2026-07-19T14:10:27.8172707+00:00",
+            "status": "OK",
+            "comments": "",
+            "hasCertificate": true,
+            "isExternallyManaged": false,
+            "tags": []
+        }
+    ],
+    "totalResults": 1,
+    "pageIndex": 0,
+    "pageSize": 0
+}
+
+
+Download PFX File
+=================
+{{hub_api_url}}/api/v1/certificate/{{instanceId}}/download/{{managedCertId}}/{{format}}
+Puis Send + Save Response
+
+
+
+Lister DeploymentProviders (01.Get-DeploymentProviders):
+=======================================================
+GET {{hub_api_url}}/internal/v1/deploymenttask/{{instanceId}}
+1907 lignes
+
+Puis lister les providers:
+PS C:\Users\Driss> Get-Content "C:\Users\Driss\Downloads\Postman\response-01.Get-DeploymentProviders.json" | Select-String Certify.Providers
+
+    "id": "Certify.Providers.DeploymentTasks.CertificateStore",
+    "id": "Certify.Providers.DeploymentTasks.IIS",
+    "id": "Certify.Providers.DeploymentTasks.Webhook",
+    "id": "Certify.Providers.DeploymentTasks.AzureAppService",
+    "id": "Certify.Providers.DeploymentTasks.AzureKeyVault",
+    "id": "Certify.Providers.DeploymentTasks.ADFS",
+    "id": "Certify.Providers.DeploymentTasks.Apache",
+    "id": "Certify.Providers.DeploymentTasks.CCS",  ------------------------------ Il sera vu prochainement dans une migration de tâche PowerShell vers une tâche CCS
+    "id": "Certify.Providers.DeploymentTasks.CertificateExport", ------------------------------ utilisé pour la tache d'export de fichier PFX (voir la suite)
+    "id": "Certify.Providers.DeploymentTasks.Doppler",
+    "id": "Certify.Providers.DeploymentTasks.Exchange",
+    "id": "Certify.Providers.DeploymentTasks.GenericServer",
+    "id": "Certify.Providers.DeploymentTasks.HashicorpVault",
+    "id": "Certify.Providers.DeploymentTasks.Nginx",
+    "id": "Certify.Providers.DeploymentTasks.Powershell", ------------------------------ utilisé pour la tache de déploiement et renouvellement automatiques de certificats (voir la suite) -PowerShell V 5.1
+    "id": "Certify.Providers.DeploymentTasks.RDPGateway",
+    "id": "Certify.Providers.DeploymentTasks.RDPListener",
+    "id": "Certify.Providers.DeploymentTasks.RemoteAccess",
+    "id": "Certify.Providers.DeploymentTasks.ShellExecute", ------------------------------ utilisé pour la tache de déploiement et renouvellement automatiques de certificats -PowerShell V 7 (PWSH.EXE)
+
+    "id": "Certify.Providers.DeploymentTasks.ServiceManager", 
+    "id": "Certify.Providers.DeploymentTasks.SetCertificateKeyPermissions",
+    "id": "Certify.Providers.DeploymentTasks.Tomcat",
+    "id": "Certify.Providers.DeploymentTasks.UpdatePortBinding",
+    "id": "Certify.Providers.DeploymentTasks.Wait",
+
+
+Tester la configuration (02.Test-configuration):
+===============================================
+GET {{hub_api_url}}/internal/v1/certificate/{{instanceId}}/settings/{{managedCertId}}
+207 lignes
+ex:
+...
+...
+...
+"postRequestTasks": [
+        {
+            "id": "88ee57d4-6818-4cd8-ba2d-ecac0ef5b05e",
+            "taskTypeId": "Certify.Providers.DeploymentTasks.CertificateExport",  
+            "taskName": "latest.pfx", ------------------------------------------------- tache export PFX
+            "description": "",
+            "isFatalOnError": false,
+            "retriesAllowed": 0,
+            "retryDelaySeconds": 10,
+            "challengeProvider": "Certify.StandardChallenges.Local",
+            "challengeCredentialKey": "",
+            "targetHost": "",
+            "parameters": [
+                {
+                    "key": "path",
+                    "value": "C:\\CertifyScripts\\export\\latest.pfx"
+                },
+                {
+                    "key": "type",
+                    "value": "pfxfull"
+                },
+                {
+                    "key": "strict",
+                    "value": "true"
+                }
+            ],
+            "dateLastExecuted": "2026-07-17T18:38:27.7493549+00:00",
+            "lastResult": "Task Completed OK",
+            "lastRunStatus": 3,
+            "taskTrigger": 2,
+            "runIfLastStepFailed": true,
+            "isChanged": false
+        },
+        {
+            "id": "cc9e5105-8232-42d3-9267-7dc39b129834",
+            "taskTypeId": "Certify.Providers.DeploymentTasks.Powershell",
+            "taskName": "Deploy-cert-to-backends", ------------------------------------------------- tache déploiement et renouvellement cert des serveurs IIS Backend 
+            "description": "",
+            "isFatalOnError": false,
+            "retriesAllowed": 0,
+            "retryDelaySeconds": 10,
+            "challengeProvider": "Certify.StandardChallenges.Local",
+            "challengeCredentialKey": "",
+            "targetHost": "",
+            "parameters": [
+                {
+                    "key": "scriptpath",
+                    "value": "C:\\CertifyScripts\\deploy-cert-to-backends.ps1"
+                },
+                {
+                    "key": "inputresult",
+                    "value": "false"
+                },
+                {
+                    "key": "logontype",
+                    "value": "network"
+                },
+                {
+                    "key": "impersonationmode",
+                    "value": "Default"
+                },
+                {
+                    "key": "executionmode",
+                    "value": "Automatic"
+                },
+                {
+                    "key": "args",
+                    "value": null
+                },
+                {
+                    "key": "timeout",
+                    "value": "5"
+                }
+            ],
+            "dateLastExecuted": "2026-07-17T18:38:27.7501677+00:00",
+            "lastResult": "Task Completed OK",
+            "lastRunStatus": 3,
+            "taskTrigger": 2,
+            "runIfLastStepFailed": false,
+            "isChanged": false
+        }
+    ],
+
+    "instanceId": "17dfbdd7-b834-4da0-8f3c-e18f8395b48a",
+    "externalSource": null,
+    "name": "api-rest.optimedit.eu",
+    "comments": null,
+    "itemType": 1,
+    "dateStart": "2026-07-17T19:39:53+02:00",
+    "dateExpiry": "2026-10-15T19:39:52+02:00",
+    "dateRenewed": "2026-07-17T18:38:26.5356562+00:00",
+    "dateLastOcspCheck": "2026-07-17T18:38:26.5356565+00:00",
+    "dateLastRenewalInfoCheck": "2026-07-19T14:45:14.3871998+00:00",
+    "dateNextScheduledRenewalAttempt": "2026-09-16T09:47:57+00:00",
+    "dateLastRenewalAttempt": "2026-07-17T18:38:35.3140941+00:00",
+    "dateRetrieved": "2026-07-19T14:47:52.3965418+00:00",
+    "lastRenewalStatus": 3,
+    "lastPrimaryRequest": {
+        "status": 3,
+        "message": "New certificate received OK."
+    }
+
+...
+...
+...
+
+# Test configuration avec POST
+onglet Body : sortie de 02.Test-configuration (GET {{hub_api_url}}/internal/v1/certificate/{{instanceId}}/settings/{{managedCertId}})
+onglet Param : Key = instanceId et Value = {{instanceId}}
+
+POST {{hub_api_url}}/internal/v1/certificate/test?instanceId={{instanceId}}
+
+---
+[
+    {
+        "isOK": true,
+        "hasWarning": false,
+        "message": "Application Pool: Configuration Override Enabled",
+        "failedItemSummary": [],
+        "result": null
+    },
+    {
+        "isOK": true,
+        "hasWarning": false,
+        "message": "Http Challenge Server process available.",
+        "failedItemSummary": [],
+        "result": null
+    },
+    {
+        "isOK": true,
+        "hasWarning": false,
+        "message": "Skipping URL access checks and auto config (if applicable): http://api-rest.optimedit.eu/.well-known/acme-challenge/configcheck. Will resume checks if renewal failure count exceeds 2 attempts.",
+        "failedItemSummary": [],
+        "result": {
+            "IsSuccess": true,
+            "IsWarning": false,
+            "Message": "Skipping URL access checks and auto config (if applicable): http://api-rest.optimedit.eu/.well-known/acme-challenge/configcheck. Will resume checks if renewal failure count exceeds 2 attempts.",
+            "Result": null
+        }
+    }
+]
+---

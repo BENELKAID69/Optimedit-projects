@@ -1,0 +1,107 @@
+2026-07-21 20:11	[INF]	 ---- Beginning Request [api-rest.optimedit.eu] ----
+
+2026-07-21 20:11	[INF]	 Certify/7.1.1.0 (Microsoft Windows 10.0.20348; Microsoft Windows NT 10.0.20348.0) 
+
+2026-07-21 20:11	[INF]	 Beginning certificate request process: api-rest.optimedit.eu using ACME provider Anvil
+
+2026-07-21 20:11	[INF]	 The selected Certificate Authority is: Let's Encrypt
+
+2026-07-21 20:11	[INF]	 Requested identifiers to include on certificate: api-rest.optimedit.eu
+
+2026-07-21 20:11	[INF]	 Created ACME Order: https://acme-v02.api.letsencrypt.org/acme/order/3514494236/535020079965
+
+2026-07-21 20:11	[INF]	 Order is ready and valid. Auth challenges will not be re-attempted.
+
+2026-07-21 20:11	[INF]	 [Progress] Order authorizations already completed.
+
+2026-07-21 20:11	[INF]	 Resuming certificate request using CA: Let's Encrypt
+
+2026-07-21 20:11	[INF]	 [Progress] Requesting certificate via Certificate Authority
+
+2026-07-21 20:11	[INF]	 [Progress] Completed certificate request.
+
+2026-07-21 20:11	[INF]	 [Progress] Performing automated certificate binding
+
+2026-07-21 20:11	[INF]	 CertificateStorage: Certificate Stored - Certificate stored OK
+
+2026-07-21 20:11	[INF]	 Deployment.UpdateBinding: Install Certificate For Binding - Update https binding | Default Web Site | **\*:443:api-rest.optimedit.eu SNI**
+
+2026-07-21 20:11	[INF]	 Binding Details: Thumbprint Match - Certificate thumbprint on existing binding matches previous certificate.
+
+2026-07-21 20:11	[INF]	 Binding Details: Update Binding - The existing binding will be updated with new settings.
+
+2026-07-21 20:11	[INF]	 Deployment.UpdateBinding: Install Certificate For Binding - Update https binding | HUB | **\*:8443: Non-SNI**
+
+2026-07-21 20:11	[INF]	 Binding Details: Thumbprint Match - Certificate thumbprint on existing binding matches previous certificate.
+
+2026-07-21 20:11	[INF]	 Binding Details: Update Binding - The existing binding will be updated with new settings.
+
+2026-07-21 20:11	[INF]	 Binding Details: Binding Port - Existing binding uses non-default port so that will be re-used in the updated binding.
+
+2026-07-21 20:11	[INF]	 Completed certificate request and automated binding updates
+
+2026-07-21 20:11	[INF]	 [Progress] New certificate received and standard deployment performed OK.
+
+2026-07-21 20:11	[INF]	 Performing Post-Request (Deployment) Tasks..
+
+2026-07-21 20:11	[INF]	 Task [latest.pfx] :: Task is enabled and primary request was successful.
+
+2026-07-21 20:11	[INF]	 Export Certificate: Copying file to C:\CertifyScripts\export\latest.pfx
+
+2026-07-21 20:11	[INF]	 File Copy completed: C:\CertifyScripts\export\latest.pfx
+
+2026-07-21 20:11	[INF]	 Task [Deploy-cert-to-backends-pwsh] :: Task is enabled and primary request was successful.
+
+2026-07-21 20:11	[INF]	 Version PowerShell utilis‚e : 7.6.3
+
+2026-07-21 22:11	[INFO]	 === DBUT DU DPLOIEMENT ===
+
+2026-07-21 22:11	[INFO]	 Chargement de la cl‚ AES...
+
+2026-07-21 22:11	[INFO]	 Chargement des secrets chiffr‚s...
+
+2026-07-21 22:11	[INFO]	 Secrets charg‚s avec succŠs.
+
+2026-07-21 22:11	[INFO]	 === D‚ploiement vers SRV-WEB-02 ===
+
+2026-07-21 22:11	[INFO]	 Ouverture de la session distante...
+
+2026-07-21 22:11	[INFO]	 Session ouverte.
+
+2026-07-21 22:11	[INFO]	 Suppression ancien PFX temporaire...
+
+2026-07-21 22:11	[INFO]	 Copie du nouveau PFX...
+
+2026-07-21 22:11	[INFO]	 Copie OK.
+
+2026-07-21 22:11	[INFO]	 Import du certificat + mise … jour IIS...
+
+2026-07-21 22:11	[INFO]	 Binding mis … jour avec thumbprint : Import du certificat... Certificat import‚ : 2AE7E408DB28922182725D062CBA7043AD83FA73 Suppression des anciens bindings HTTPS... Binding sans host header supprim‚. Binding HTTPS recr‚‚. Application du certificat au binding...  Nettoyage anciens certificats... Suppression du PFX temporaire... 2AE7E408DB28922182725D062CBA7043AD83FA73
+
+2026-07-21 22:11	[INFO]	 Session ferm‚e.
+
+2026-07-21 22:11	[INFO]	 === D‚ploiement vers SRV-WEB-03 ===
+
+2026-07-21 22:11	[INFO]	 Ouverture de la session distante...
+
+2026-07-21 22:11	[INFO]	 Session ouverte.
+
+2026-07-21 22:11	[INFO]	 Suppression ancien PFX temporaire...
+
+2026-07-21 22:11	[INFO]	 Copie du nouveau PFX...
+
+2026-07-21 22:11	[INFO]	 Copie OK.
+
+2026-07-21 22:11	[INFO]	 Import du certificat + mise … jour IIS...
+
+2026-07-21 22:11	[INFO]	 Binding mis … jour avec thumbprint : Import du certificat... Certificat import‚ : 2AE7E408DB28922182725D062CBA7043AD83FA73 Suppression des anciens bindings HTTPS... Binding sans host header supprim‚. Binding HTTPS recr‚‚. Application du certificat au binding...  Nettoyage anciens certificats... Suppression du PFX temporaire... 2AE7E408DB28922182725D062CBA7043AD83FA73
+
+2026-07-21 22:11	[INFO]	 Session ferm‚e.
+
+2026-07-21 22:11	[INFO]	 === DPLOIEMENT TERMIN SUR TOUS LES SERVEURS ===
+
+2026-07-21 22:11	[INFO]	 Log complet disponible : C:\CertifyScripts\logs_pwsh\deploy_20260721_201135.log
+
+2026-07-21 20:11	[INF]	 latest.pfx :: Task Completed OK
+
+2026-07-21 20:11	[INF]	 Deploy-cert-to-backends-pwsh :: Task Completed OK

@@ -1,0 +1,195 @@
+{
+  "sourceId": null,
+  "sourceName": null,
+  "certificateAuthorityId": null,
+  "useStagingMode": false,
+  "includeInAutoRenew": true,
+  "domainOptions": [
+    {
+      "domain": "api-rest.optimedit.eu",
+      "isPrimaryDomain": true,
+      "isSelected": true,
+      "isManualEntry": true,
+      "title": "",
+      "type": "dns",
+      "isChanged": false
+    }
+  ],
+  "requestConfig": {
+    "primaryDomain": "api-rest.optimedit.eu",
+    "subjectAlternativeNames": [
+      "api-rest.optimedit.eu"
+    ],
+    "subjectIPAddresses": [],
+    "websiteRootPath": null,
+    "bindingIPAddress": null,
+    "bindingPort": null,
+    "bindingUseSNI": null,
+    "performChallengeFileCopy": true,
+    "performExtensionlessConfigChecks": true,
+    "performTlsSniBindingConfigChecks": true,
+    "performAutoConfig": true,
+    "performAutomatedCertBinding": true,
+    "alwaysRecreateBindings": false,
+    "enableFailureNotifications": true,
+    "includeCN": false,
+    "challengeType": "http-01",
+    "webhookTrigger": "None",
+    "webhookMethod": null,
+    "webhookUrl": null,
+    "webhookContentType": null,
+    "webhookContentBody": null,
+    "preRequestPowerShellScript": null,
+    "postRequestPowerShellScript": null,
+    "csrKeyAlg": null,
+    "deploymentSiteOption": 5,
+    "deploymentBindingOption": 10,
+    "deploymentBindingMatchHostname": true,
+    "deploymentBindingBlankHostname": false,
+    "deploymentBindingReplacePrevious": true,
+    "deploymentTargetType": null,
+    "challenges": [
+      {
+        "challengeType": "http-01",
+        "domainMatch": null,
+        "challengeProvider": null,
+        "challengeCredentialKey": null,
+        "challengeRootPath": null,
+        "zoneId": null,
+        "challengeDelegationRule": null,
+        "parameters": null,
+        "isChanged": false
+      }
+    ],
+    "customCSR": null,
+    "authorityTokens": null,
+    "customPrivateKey": null,
+    "reusePrivateKey": false,
+    "requireOcspMustStaple": false,
+    "preferredChain": null,
+    "preferredExpiryDays": null,
+    "acmeProfile": null,
+    "isChanged": false
+  },
+  "preRequestTasks": [],
+  "postRequestTasks": [
+    {
+      "id": "88ee57d4-6818-4cd8-ba2d-ecac0ef5b05e",
+      "taskTypeId": "Certify.Providers.DeploymentTasks.CertificateExport",
+      "taskName": "latest.pfx",
+      "description": "",
+      "isFatalOnError": false,
+      "retriesAllowed": 0,
+      "retryDelaySeconds": 10,
+      "challengeProvider": "Certify.StandardChallenges.Local",
+      "challengeCredentialKey": "",
+      "targetHost": "",
+      "parameters": [
+        {
+          "key": "path",
+          "value": "C:\\CertifyScripts\\export\\latest.pfx"
+        },
+        {
+          "key": "type",
+          "value": "pfxfull"
+        },
+        {
+          "key": "strict",
+          "value": "true"
+        }
+      ],
+      "dateLastExecuted": "2026-07-21T18:11:34.7219857+00:00",
+      "lastResult": "Task Completed OK",
+      "lastRunStatus": 3,
+      "taskTrigger": 2,
+      "runIfLastStepFailed": true,
+      "isChanged": false
+    },
+    {
+      "id": "ba260411-9245-4c97-b645-6bb847934203",
+      "taskTypeId": "Certify.Providers.DeploymentTasks.ShellExecute",
+      "taskName": "Deploy-cert-to-backends-pwsh",
+      "description": "",
+      "isFatalOnError": false,
+      "retriesAllowed": 0,
+      "retryDelaySeconds": 10,
+      "challengeProvider": "Certify.StandardChallenges.Local",
+      "challengeCredentialKey": "",
+      "targetHost": "",
+      "parameters": [
+        {
+          "key": "path",
+          "value": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        },
+        {
+          "key": "args",
+          "value": "-File \"C:\\CertifyScripts\\pwsh\\deploy-cert-to-backends-pwsh-7.ps1\""
+        },
+        {
+          "key": "timeout",
+          "value": "5"
+        },
+        {
+          "key": "newprocess",
+          "value": "false"
+        }
+      ],
+      "dateLastExecuted": "2026-07-21T18:11:34.7308094+00:00",
+      "lastResult": "Task Completed OK",
+      "lastRunStatus": 3,
+      "taskTrigger": 2,
+      "runIfLastStepFailed": false,
+      "isChanged": false
+    }
+  ],
+  "id": "f9712ad8-bd49-430c-8cff-370633369e53",
+  "version": 43,
+  "groupId": "",
+  "serverSiteId": "",
+  "instanceId": "17dfbdd7-b834-4da0-8f3c-e18f8395b48a",
+  "externalSource": null,
+  "name": "api-rest.optimedit.eu",
+  "comments": null,
+  "itemType": 1,
+  "dateStart": "2026-07-21T19:13:00+02:00",
+  "dateExpiry": "2026-10-19T19:12:59+02:00",
+  "dateRenewed": "2026-07-21T18:11:33.4715187+00:00",
+  "dateLastOcspCheck": "2026-07-21T18:11:33.4716246+00:00",
+  "dateLastRenewalInfoCheck": "2026-07-21T18:11:33.4717176+00:00",
+  "dateNextScheduledRenewalAttempt": null,
+  "dateLastRenewalAttempt": "2026-07-21T18:11:41.5032526+00:00",
+  "dateRetrieved": "2026-07-21T19:11:29.4303073+00:00",
+  "lastRenewalStatus": 3,
+  "lastPrimaryRequest": {
+    "status": 3,
+    "message": "New certificate received OK."
+  },
+  "lastBindingDeployment": {
+    "status": 3,
+    "message": "New certificate received and standard deployment performed OK."
+  },
+  "lastAttemptedCA": "letsencrypt.org",
+  "renewalFailureCount": 0,
+  "renewalFailureMessage": "",
+  "ariCertificateId": "QBUtJnntMiCe35pyHdYyH4EMgQw.BTqqLvDraY9rp1RlcJOAupWb",
+  "certificateCurrentCA": "letsencrypt.org",
+  "certificatePath": "C:\\ProgramData\\certify\\assets\\api-rest.optimedit.eu\\20261019_e6bd91c2.pfx",
+  "certificateFriendlyName": "api-rest.optimedit.eu [Certify] - 21/07/2026 19:13:00 to 19/10/2026 19:12:59",
+  "certificateThumbprintHash": "2AE7E408DB28922182725D062CBA7043AD83FA73",
+  "certificatePreviousThumbprintHash": "FD5F0E37B7C5591D08778386259519BB742DEA95",
+  "certificateRevoked": false,
+  "certificatePasswordCredentialId": null,
+  "currentOrderUri": "https://acme-v02.api.letsencrypt.org/acme/order/3514494236/535020079965",
+  "skipCertificateRequest": false,
+  "customRenewalTarget": null,
+  "customRenewalIntervalMode": null,
+  "maintenanceWindowId": null,
+  "certificatePEM": null,
+  "deleted": false,
+  "certificateLifetime": {
+    "dateStart": "2026-07-21T19:13:00+02:00",
+    "dateEnd": "2026-10-19T19:12:59+02:00"
+  },
+  "health": 1,
+  "isChanged": true
+}

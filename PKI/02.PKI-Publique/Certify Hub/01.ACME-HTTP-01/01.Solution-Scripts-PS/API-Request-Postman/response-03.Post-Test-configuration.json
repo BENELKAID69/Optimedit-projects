@@ -1,0 +1,43 @@
+# comments a supprimer GET {{hub_api_url}}/internal/v1/certificate/test?instanceId={{instanceId}}
+# onglet Body : sortie de "GET {{hub_api_url}}/internal/v1/certificate/{{instanceId}}/settings/{{managedCertId}}" = (02.Test-configuration)
+# onglet Param : Key = instanceId, Value = {{instanceId}}
+[
+  {
+    "isOK": true,
+    "hasWarning": false,
+    "message": "Application Pool: Configuration Override Enabled",
+    "failedItemSummary": [],
+    "result": null
+  },
+  {
+    "isOK": true,
+    "hasWarning": false,
+    "message": "Http Challenge Server process available.",
+    "failedItemSummary": [],
+    "result": null
+  },
+  {
+    "isOK": true,
+    "hasWarning": false,
+    "message": "Skipping URL access checks and auto config (if applicable): http://api-rest.optimedit.eu/.well-known/acme-challenge/configcheck. Will resume checks if renewal failure count exceeds 2 attempts.",
+    "failedItemSummary": [],
+    "result": {
+      "IsSuccess": true,
+      "IsWarning": false,
+      "Message": "Skipping URL access checks and auto config (if applicable): http://api-rest.optimedit.eu/.well-known/acme-challenge/configcheck. Will resume checks if renewal failure count exceeds 2 attempts.",
+      "Result": null
+    }
+  }
+]
+
+
+
+********** Explication de "Will resume checks if renewal failure count exceeds 2 attempts" **********
+
+C'est un mécanisme d'optimisation adaptative de Certify : normalement, à chaque renouvellement, 
+le moteur vérifie activement que le chemin ACME (/.well-known/acme-challenge/...) est bien accessible 
+depuis Internet avant de lancer la vraie demande — un vrai test réseau, qui prend du temps.
+
+Une fois qu'un domaine a suffisamment de succès consécutifs, Certify considère cette vérification comme 
+"acquise" et la saute aux renouvellements suivants pour gagner du temps ("Skipping URL access checks") — logique,
+puisque rien n'a changé dans la config entretemps.
