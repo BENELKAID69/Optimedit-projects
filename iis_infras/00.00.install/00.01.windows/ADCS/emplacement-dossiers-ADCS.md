@@ -1,4 +1,5 @@
 Les dossiers de PKI ADCS sont déplacées vers "/projets_optimedit/PKI/01.PKI-Entreprise/ADCS/"
+Lien https://github.com/BENELKAID69/Optimedit-projects/tree/main/PKI/01.PKI-Entreprise/ADCS
 
 ls -al /projets_optimedit/PKI/01.PKI-Entreprise/ADCS/
 total 20
