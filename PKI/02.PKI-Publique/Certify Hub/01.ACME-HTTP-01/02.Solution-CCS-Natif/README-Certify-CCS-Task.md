@@ -4,7 +4,7 @@
 # README-Certify-CCS-Task.md
 
 ### Migration du déploiement de certificats de PowerShell vers le Centralized Certificate Store (CCS) IIS
-**Certify Management Hub → Stockage UNC Centralisé (`\API-REST\CCSStore`) → IIS SNI**
+**Certify Management Hub → Stockage UNC Centralisé (`\\API-REST\CCSStore`) → IIS SNI**
 
 ![Certify The Web](https://img.shields.io/badge/Certify-Management%20Hub-2E7D32?style=for-the-badge)
 ![IIS](https://img.shields.io/badge/IIS-Centralized%20Store-0078D4?style=for-the-badge&logo=windows&logoColor=white)
@@ -26,7 +26,7 @@
 ### 🎯 Objectifs & Bénéfices
 
 - 🗑️ **Suppression du script PowerShell** de déploiement à distance et de sa maintenance
-- 📂 **Centralisation native** des certificats dans un dossier UNC (`\API-REST\CCSStore`)
+- 📂 **Centralisation native** des certificats dans un dossier UNC (`\\API-REST\CCSStore`)
 - 🌐 **Activation de l'indicateur SNI** obligatoire sur les fermes IIS backends (`SRV-WEB-02` / `SRV-WEB-03`)
 - 🔒 **Conservation intacte du challenge HTTP-01** pour `api-rest.optimedit.eu` (aucune modification ACME requise)
 - 🚀 **Automatisation transparente** gérée par le provider natif Certify (`Certify.Providers.DeploymentTasks.CCS`)
@@ -38,11 +38,11 @@
 
 ```mermaid
 graph TD
-    A[🔁 Let's Encrypt<br/>Challenge HTTP-01] --> B[📦 Certify Hub<br/>Génération PFX interne]
-    B --> C[📁 Tâche CCS<br/>Export UNC direct]
-    C --> D[🌐 Partage \API-REST\CCSStore<br/>api-rest.optimedit.eu.pfx]
-    D --> E[🖥️ SRV-WEB-02<br/>Lecture à la volée (SNI)]
-    D --> F[🖥️ SRV-WEB-03<br/>Lecture à la volée (SNI)]
+    A[Lets Encrypt Challenge HTTP-01] --> B[Certify Hub Generation PFX]
+    B --> C[Task CCS Export UNC]
+    C --> D[Share API-REST CCSStore]
+    D --> E[SRV-WEB-02 SNI]
+    D --> F[SRV-WEB-03 SNI]
 ```
 
 </td>
@@ -55,7 +55,7 @@ graph TD
 
 | Équipement | Rôle | IP / Chemin | Détails techniques |
 |---|---|---|---|
-| **API-REST** | Orchestrateur & Reverse Proxy | `192.168.1.125` | Héberge le Certify Management Hub et le partage `\API-REST\CCSStore` |
+| **API-REST** | Orchestrateur & Reverse Proxy | `192.168.1.125` | Héberge le Certify Management Hub et le partage `\\API-REST\CCSStore` |
 | **SRV-WEB-02** | Backend IIS 1 | `192.168.1.33` | Pointé vers le CCS avec SNI actif (`SslFlags = 3`) |
 | **SRV-WEB-03** | Backend IIS 2 | `192.168.1.169` | Pointé vers le CCS avec SNI actif (`SslFlags = 3`) |
 | **Certificat** | Mono-domaine cible | `api-rest.optimedit.eu` | Validé via HTTP-01, stocké au format PFX standard |
@@ -67,7 +67,7 @@ graph TD
 Sur le serveur orchestrateur **API-REST**, préparez le stockage centralisé :
 
 1. Créer le dossier local : `C:\CCSStore`
-2. Configurer le partage réseau : `\API-REST\CCSStore`
+2. Configurer le partage réseau : `\\API-REST\CCSStore`
 3. **Droits NTFS & Partage :**
    - 📖 **Lecture :** Comptes machine des backends (`SRV-WEB-02$`, `SRV-WEB-03$`) + compte de service de lecture IIS (`OPTIMEDIT\svc_certify`).
    - ✍️ **Écriture :** Compte exécutant le Certify Hub (`LocalSystem` sur API-REST).
@@ -87,7 +87,7 @@ Dans le **Certify Management Hub** (`api-rest.optimedit.eu` → Tasks → Deploy
 | **Trigger** | `Run On Success` |
 | **Run task even if previous task step failed** | ❌ Décoché |
 | **Target Type** | `Local (as current service user)` |
-| **Destination Path** | `\API-REST\CCSStore` |
+| **Destination Path** | `\\API-REST\CCSStore` |
 
 ---
 
@@ -106,7 +106,7 @@ Install-WindowsFeature Web-CertProvider -IncludeManagementTools
 $readCred = Get-Credential -Message "Compte avec accès lecture au partage CCS (ex: OPTIMEDIT\svc_certify)"
 
 Enable-IISCentralCertProvider `
-    -CertStoreLocation "\API-REST\CCSStore" `
+    -CertStoreLocation "\\API-REST\CCSStore" `
     -UserName $readCred.UserName `
     -Password $readCred.Password `
     -PrivateKeyPassword (Read-Host -AsSecureString "Mot de passe privé CCS")
