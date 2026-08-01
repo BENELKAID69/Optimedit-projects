@@ -18,7 +18,7 @@
 
 ## ✨ Ce que fait cette solution
 
-> Renouvelle un certificat sur **un seul serveur central**, et le voit se propager **tout seul**, en toute sécurité, sur tous vos serveurs IIS backend — sans jamais taper un mot de passe en clair.
+> Renouvelle un certificat sur **un seul serveur central**, et le voit se propager **tout seul** -grace à une tâche planifie-, en toute sécurité, sur tous les serveurs IIS backends — sans jamais taper un mot de passe en clair.
 
 <table>
 <tr>
