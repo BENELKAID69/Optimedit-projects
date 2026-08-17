@@ -1,0 +1,8 @@
+﻿Server;TaskName;State;Enabled;LastRunTime;NextRunTime;LastTaskResult;Trigger;Action;UserId;Exists;Error;PSComputerName;RunspaceId;PSShowComputerName
+OPT-IIS-01.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-01.optimedit.eu;df2d76c4-b739-42d3-b0fe-cabf541befb3;True
+OPT-IIS-02.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-02.optimedit.eu;e55aec27-31b4-424d-8951-90a43ed6d581;True
+OPT-IIS-03.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-03.optimedit.eu;79f475ec-cb93-45eb-834a-0c8611f06ef1;True
+OPT-IIS-04.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-04.optimedit.eu;b66dbc5d-1f35-44da-b761-94cdde9b1188;True
+OPT-IIS-05.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-05.optimedit.eu;7af8115f-2082-4c38-ab66-a7c81857f2ae;True
+OPT-IIS-06.optimedit.eu;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-IIS-06.optimedit.eu;d78ecd81-cfb4-47f6-aa46-67c8e9cf0c9e;True
+OPT-RP-01;IIS-SAN-Cert-Renewal;Ready;True;13/08/2026 22:00;14/08/2026 22:00;0;CimInstance;CimInstance;Système;True;;OPT-RP-01;911e4eff-7617-4ace-8a9c-6dc4ae05abe5;True

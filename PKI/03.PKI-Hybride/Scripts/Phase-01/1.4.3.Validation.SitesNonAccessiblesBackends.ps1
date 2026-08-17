@@ -1,5 +1,5 @@
 <# 
-    Script : 1.3.Validation.SitesNonAccessiblesBackends.ps1
+    Script : 1.4.3.Validation.SitesNonAccessiblesBackends.ps1
     Objectif : Vérifier que les sites NE répondent PAS directement depuis les backends
     Auteur : Driss / Optimedit
     Version : 1.0
@@ -12,7 +12,7 @@
       - Ce test doit être fait depuis un poste LAN/VPN NON autorisé.
 #>
 
-Write-Host "===== TEST 8 — VALIDATION : Sites NON accessibles depuis les backends =====" -ForegroundColor Cyan
+Write-Host "===== TEST — VALIDATION : Sites NON accessibles depuis les backends =====" -ForegroundColor Cyan
 Write-Host "Ce test doit être exécuté depuis un poste LAN/VPN NON OPT-RP-01" -ForegroundColor Yellow
 
 # ============================================================
@@ -34,10 +34,10 @@ $Sites = @(
 )
 
 # ============================================================
-# Test 8 : Les sites NE doivent PAS répondre depuis les backends
+# Test : Les sites NE doivent PAS répondre depuis les backends
 # ============================================================
 
-Write-Host "`n--- TEST 8 : Vérifier que les sites ne répondent pas depuis les backends ---" -ForegroundColor Yellow
+Write-Host "`n--- TEST : Vérifier que les sites ne répondent pas depuis les backends ---" -ForegroundColor Yellow
 
 foreach ($s in $Sites) {
     foreach ($b in $Backends) {
@@ -58,4 +58,4 @@ foreach ($s in $Sites) {
     }
 }
 
-Write-Host "`n===== TEST 8 TERMINÉ =====" -ForegroundColor Cyan
+Write-Host "`n===== TEST TERMINÉ =====" -ForegroundColor Cyan

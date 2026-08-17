@@ -1,5 +1,5 @@
 ﻿<# 
-    Script : 1.4.Update-DNS-OptimeditSites.ps1
+    Script : 1.4.2.Update-DNS-OptimeditSites-RP.ps1
     Objectif : Recréer les entrées DNS des 13 sites vers OPT-RP-01
     Auteur : Driss / Optimedit
     Version : 1.0

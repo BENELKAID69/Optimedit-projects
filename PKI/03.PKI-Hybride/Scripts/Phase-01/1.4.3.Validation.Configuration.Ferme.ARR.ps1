@@ -1,5 +1,5 @@
 <# 
-    Script : 1.3.Validation.Configuration.Ferme.ARR.ps1
+    Script : 1.4.3.Validation.Configuration.Ferme.ARR.ps1
     Objectif : Valider la configuration HTTP 80 + ARR + DNS pour la Phase 1.3
     Auteur : Driss / Optimedit
     Version : 2.0

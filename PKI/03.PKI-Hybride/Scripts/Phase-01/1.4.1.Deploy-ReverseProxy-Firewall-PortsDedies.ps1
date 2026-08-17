@@ -1,5 +1,5 @@
 <# 
-    Script : Deploy-ReverseProxy-Firewall-PortsDedies.ps1
+    Script : 1.4.1.Deploy-ReverseProxy-Firewall-PortsDedies.ps1
     Objectif : Autoriser OPT-RP-01 sur les ports dédiés 8060–8072
     Auteur : Driss / Optimedit
     Version : 1.0

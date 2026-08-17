@@ -1,0 +1,76 @@
+
+Application name CertifyWebHubDNS01
+Application description Certify The Web DNS-01 Automation
+Application key a4a1eb984a1fafe1
+Application secret 2ab56e7561a34b02fed52c4784a53f86
+Consumer Key 1e977ad3d76a194b90c89c4b14a81e1c
+
+Validity : Unlimited
+GET    /domain/zone/*
+POST   /domain/zone/*
+DELETE /domain/zone/*
+
+
+
+
+
+
+ANCIENNE
+Application name CertifyHubDNS01
+Application description Certify The Web DNS-01 Automation
+Application key 5ee3ed345dd635e6
+Application secret 7d1f08e77d89abdd8b733b8f8fb4cb22
+Consumer Key 60f91ba9b4bbcf72a6cd15dda70cbf2e
+
+
+
+ANCIENNE
+Application name CertifyDNS01
+Application description Certify The Web DNS-01 Automation
+Application key 7fd9bd306884c035
+Application secret 3dea46b2805d0fdd6c312ecce5f65075
+
+
+
+
+
+# Supprimer les règles trop larges
+iptables -t nat -D PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.3.200:80
+iptables -t nat -D PREROUTING -p tcp --dport 443 -j DNAT --to-destination 192.168.3.200:443
+
+# Les recréer, restreintes à l'interface publique eth0 - est une solution fait pour faire fonctionner ces deux commandes suivantes:
+Sur le revers proxy OPT-RP-01
+Test-NetConnection -ComputerName eu.api.ovh.com -Port 443
+Vérifier que Let's Encrypt sortant fonctionne aussi :
+Test-NetConnection -ComputerName acme-v02.api.letsencrypt.org -Port 443
+
+
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.3.200:80
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination 192.168.3.200:443
+
+
+iptables -t nat -L -v -n --line-numbers
+
+
+####  Corriction
+🟥 5. La solution exacte (testée, validée, propre)
+
+Tu dois NATer tous les LAN internes vers le reverse‑proxy.
+🟩 Solution simple et propre :
+Code
+
+iptables -t nat -D POSTROUTING 1
+iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.2.0/24 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.3.0/24 -j MASQUERADE
+
+🟩 Ou version compacte :
+Code
+
+iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -j MASQUERADE
+
+🟩 Puis :
+Code
+
+netfilter-persistent save
+netfilter-persistent save

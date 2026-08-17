@@ -1,5 +1,5 @@
 ﻿<# 
-    Script : Deploy-ReverseProxy-Firewall.ps1
+    Script : 1.4.1.Deploy-ReverseProxy-Firewall.ps1
     Objectif : Déployer les règles firewall Reverse Proxy sur les 6 backends IIS
     Auteur : Driss / Optimedit
     Version : 1.1

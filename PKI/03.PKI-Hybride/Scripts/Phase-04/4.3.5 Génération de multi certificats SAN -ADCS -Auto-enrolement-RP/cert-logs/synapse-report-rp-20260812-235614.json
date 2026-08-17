@@ -1,0 +1,27 @@
+﻿{
+    "ScriptType":  "RP - Ports dédiés uniquement",
+    "Certificate":  {
+                        "ExpiresOn":  "2026-11-10",
+                        "Thumbprint":  "C31371C4B4AF602742A1D387B951DB137C1D12B6"
+                    },
+    "SitesFailed":  0,
+    "SitesProcessed":  13,
+    "ExecutionDate":  "2026-08-12 23:56:14",
+    "Status":  "SUCCESS",
+    "SiteResults":  [
+                        "[OK] blog",
+                        "[OK] juridique",
+                        "[OK] it",
+                        "[OK] paie",
+                        "[OK] direction",
+                        "[OK] commercial",
+                        "[OK] comptabilite",
+                        "[OK] client",
+                        "[OK] achat",
+                        "[OK] formation",
+                        "[OK] production",
+                        "[OK] ce",
+                        "[OK] rh"
+                    ],
+    "Server":  "opt-rp-01.optimedit.eu"
+}

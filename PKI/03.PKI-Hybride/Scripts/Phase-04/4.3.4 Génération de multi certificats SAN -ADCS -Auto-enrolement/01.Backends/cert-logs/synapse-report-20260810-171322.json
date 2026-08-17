@@ -1,0 +1,26 @@
+﻿{
+    "ExecutionDate":  "2026-08-10 17:13:22",
+    "SitesFailed":  0,
+    "Server":  "opt-iis-04.optimedit.eu",
+    "Certificate":  {
+                        "ExpiresOn":  "2026-11-08",
+                        "Thumbprint":  "0771F8F175BEBAC40FE6F87BC9798B138BA6092B"
+                    },
+    "SiteResults":  [
+                        "[OK] Site_juridique",
+                        "[OK] Site_client",
+                        "[OK] Site_rh",
+                        "[OK] Site_blog",
+                        "[OK] Site_production",
+                        "[OK] Site_comptabilite",
+                        "[OK] Site_commercial",
+                        "[OK] Site_paie",
+                        "[OK] Site_ce",
+                        "[OK] Site_formation",
+                        "[OK] Site_direction",
+                        "[OK] Site_achat",
+                        "[OK] Site_it"
+                    ],
+    "Status":  "SUCCESS",
+    "SitesProcessed":  13
+}
