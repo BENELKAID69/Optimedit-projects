@@ -2,25 +2,695 @@
 # ==============================================================================
 # Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/02.00.plays_install_iis_pool_http
 # Fichier      : 02.02.play_iis_generate_index.html.yml
-# Description  :          
+# Description  : Génération d'un portail applicatif HTML/CSS professionnel
+#                pour les 13 applications métiers OPTIMEDIT.
+#                Chaque site affiche :
+#                  - Un portail métier avec navigation croisée
+#                  - Un bandeau technique de diagnostic (bascule ARR/IIS)
+#                  - Un indicateur de santé W3SVC en temps réel
 # ==============================================================================
-- name: "Validation finale des sites IIS"
+
+- name: "Génération du portail applicatif OPTIMEDIT sur les 13 sites IIS"
   hosts: srv_iis
   become: false
-  gather_facts: true # <-- OBLIGATOIRE pour utiliser sans_hostname
+  gather_facts: true   # OBLIGATOIRE pour ansible_hostname, ansible_default_ipv4, ansible_date_time
+
+  vars:
+    # ----------------------------------------------------------------------
+    # Charte graphique OPTIMEDIT (centralisée pour cohérence globale)
+    # ----------------------------------------------------------------------
+    optimedit_primary_color:   "#0B3D91"   # Bleu corporate
+    optimedit_secondary_color: "#1E88E5"   # Bleu accent
+    optimedit_accent_color:    "#F5A623"   # Orange highlight
+    optimedit_bg_color:        "#F4F6F9"   # Fond gris clair
+    optimedit_text_color:      "#1F2933"   # Texte foncé
+    optimedit_header_gradient: "linear-gradient(135deg, #0B3D91 0%, #1E88E5 100%)"
+
+    # ----------------------------------------------------------------------
+    # Dictionnaire de correspondance nom technique -> libellé métier + icône
+    # ----------------------------------------------------------------------
+    optimedit_app_labels:
+      direction:     { label: "Direction Générale",     icon: "🏢" }
+      comptabilite:  { label: "Comptabilité",           icon: "📊" }
+      paie:          { label: "Paie & Rémunération",    icon: "💶" }
+      rh:            { label: "Ressources Humaines",    icon: "👥" }
+      ce:            { label: "Comité d'Entreprise",    icon: "🤝" }
+      it:            { label: "Systèmes & Réseaux",     icon: "💻" }
+      production:    { label: "Production",             icon: "🏭" }
+      formation:     { label: "Formation",              icon: "🎓" }
+      achat:         { label: "Achats & Fournisseurs",  icon: "🛒" }
+      commercial:    { label: "Commercial & Ventes",    icon: "📈" }
+      client:        { label: "Espace Client",          icon: "👤" }
+      juridique:     { label: "Service Juridique",      icon: "⚖️" }
+      blog:          { label: "Blog Interne",           icon: "📰" }
 
   tasks:
-    - name: "Sécurité - S'assurer que les dossiers de destination existent"
+    # ==========================================================================
+    # 1. S'assurer que les dossiers de destination existent
+    # ==========================================================================
+    - name: "INFRA - S'assurer que les dossiers de destination existent"
       ansible.windows.win_file:
         path: "{{ item.path }}"
         state: directory
       loop: "{{ iis_applications }}"
 
-    - name: "Génération des pages index.html de test (Comparaison Hostnames)"
+    # ==========================================================================
+    # 2. Vérification de l'état du service W3SVC (indicateur de santé)
+    # ==========================================================================
+    - name: "DIAG - Vérification de l'état du service W3SVC"
+      ansible.windows.win_service_info:
+        name: W3SVC
+      register: w3svc_info
+
+    - name: "DIAG - Définition de la variable d'état W3SVC"
+      ansible.builtin.set_fact:
+        w3svc_status: "{{ w3svc_info.services[0].state | default('unknown') }}"
+
+    # ==========================================================================
+    # 3. Génération de la page index.html du portail applicatif
+    # ==========================================================================
+    - name: "PORTAL - Génération du portail index.html pour le site {{ item.name }}"
       ansible.windows.win_copy:
         content: |
-          <h1>Bienvenue sur le site {{ item.name | upper }} de OPTIMEDIT</h1>
-          <p>Cible Inventaire Ansible : {{ inventory_hostname }}</p>
-          <p>Nom Réel OS Windows (Fact) : {{ ansible_hostname }}</p>
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta name="description" content="Portail applicatif OPTIMEDIT - Domaine {{ domain_name }}">
+              <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+              <meta http-equiv="Pragma" content="no-cache">
+              <meta http-equiv="Expires" content="0">
+              <title>{{ optimedit_app_labels[item.name].label | default(item.name | title) }} — Portail OPTIMEDIT</title>
+              <style>
+                  /* ============================================================
+                     RESET & BASE
+                     ============================================================ */
+                  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                  html { scroll-behavior: smooth; }
+                  body {
+                      font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+                      background: {{ optimedit_bg_color }};
+                      color: {{ optimedit_text_color }};
+                      line-height: 1.6;
+                      min-height: 100vh;
+                      display: flex;
+                      flex-direction: column;
+                  }
+                  a { text-decoration: none; color: inherit; }
+
+                  /* ============================================================
+                     EN-TÊTE PRINCIPAL
+                     ============================================================ */
+                  header.opt-header {
+                      background: {{ optimedit_header_gradient }};
+                      color: #fff;
+                      padding: 24px 40px;
+                      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+                      position: sticky;
+                      top: 0;
+                      z-index: 100;
+                  }
+                  .opt-header-inner {
+                      max-width: 1400px;
+                      margin: 0 auto;
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      flex-wrap: wrap;
+                      gap: 16px;
+                  }
+                  .opt-brand {
+                      display: flex;
+                      align-items: center;
+                      gap: 14px;
+                      font-size: 1.5rem;
+                      font-weight: 700;
+                      letter-spacing: 1px;
+                  }
+                  .opt-brand-logo {
+                      background: {{ optimedit_accent_color }};
+                      color: #fff;
+                      width: 46px;
+                      height: 46px;
+                      border-radius: 10px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.4rem;
+                      font-weight: 900;
+                      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                  }
+                  .opt-brand-subtitle {
+                      font-size: 0.75rem;
+                      font-weight: 400;
+                      opacity: 0.85;
+                      letter-spacing: 0.5px;
+                  }
+                  .opt-header-meta {
+                      font-size: 0.85rem;
+                      text-align: right;
+                      opacity: 0.9;
+                  }
+                  .opt-header-meta strong { color: {{ optimedit_accent_color }}; }
+
+                  /* Indicateur de santé W3SVC */
+                  .opt-health {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 6px;
+                      padding: 4px 10px;
+                      border-radius: 20px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      margin-top: 6px;
+                  }
+                  .opt-health.up {
+                      background: rgba(0, 255, 136, 0.15);
+                      color: #00FF88;
+                      border: 1px solid rgba(0, 255, 136, 0.4);
+                  }
+                  .opt-health.down {
+                      background: rgba(255, 82, 82, 0.15);
+                      color: #FF5252;
+                      border: 1px solid rgba(255, 82, 82, 0.4);
+                  }
+                  .opt-health::before {
+                      content: '●';
+                      font-size: 0.9rem;
+                  }
+
+                  /* ============================================================
+                     MENU HORIZONTAL
+                     ============================================================ */
+                  nav.opt-nav {
+                      background: rgba(255,255,255,0.08);
+                      border-top: 1px solid rgba(255,255,255,0.15);
+                      padding: 0 40px;
+                      margin-top: 16px;
+                  }
+                  .opt-nav-inner {
+                      max-width: 1400px;
+                      margin: 0 auto;
+                      display: flex;
+                      flex-wrap: wrap;
+                      gap: 4px;
+                  }
+                  .opt-nav a {
+                      padding: 10px 16px;
+                      font-size: 0.85rem;
+                      color: #fff;
+                      border-radius: 6px 6px 0 0;
+                      transition: background 0.2s ease, color 0.2s ease;
+                      white-space: nowrap;
+                  }
+                  .opt-nav a:hover {
+                      background: {{ optimedit_accent_color }};
+                      color: #fff;
+                  }
+                  .opt-nav a.active {
+                      background: #fff;
+                      color: {{ optimedit_primary_color }};
+                      font-weight: 600;
+                  }
+
+                  /* ============================================================
+                     ZONE PRINCIPALE
+                     ============================================================ */
+                  main.opt-main {
+                      flex: 1;
+                      max-width: 1400px;
+                      width: 100%;
+                      margin: 0 auto;
+                      padding: 48px 40px;
+                  }
+                  .opt-hero {
+                      background: #fff;
+                      border-radius: 16px;
+                      padding: 36px 40px;
+                      margin-bottom: 40px;
+                      box-shadow: 0 4px 20px rgba(11,61,145,0.08);
+                      border-left: 6px solid {{ optimedit_accent_color }};
+                  }
+                  .opt-hero h1 {
+                      font-size: 2rem;
+                      color: {{ optimedit_primary_color }};
+                      margin-bottom: 8px;
+                      display: flex;
+                      align-items: center;
+                      gap: 14px;
+                  }
+                  .opt-hero h1 .opt-hero-icon { font-size: 2.2rem; }
+                  .opt-hero p {
+                      color: #52606D;
+                      font-size: 1rem;
+                      max-width: 800px;
+                  }
+                  .opt-hero-meta {
+                      margin-top: 18px;
+                      display: flex;
+                      flex-wrap: wrap;
+                      gap: 24px;
+                      font-size: 0.85rem;
+                      color: #7B8794;
+                  }
+                  .opt-hero-meta span strong { color: {{ optimedit_primary_color }}; }
+
+                  .opt-section-title {
+                      font-size: 1.1rem;
+                      font-weight: 600;
+                      color: {{ optimedit_primary_color }};
+                      margin-bottom: 20px;
+                      padding-bottom: 10px;
+                      border-bottom: 2px solid {{ optimedit_secondary_color }};
+                      display: inline-block;
+                  }
+
+                  /* ============================================================
+                     GRILLE DE CARTES
+                     ============================================================ */
+                  .opt-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                      gap: 20px;
+                  }
+                  .opt-card {
+                      background: #fff;
+                      border-radius: 14px;
+                      padding: 24px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+                      border: 1px solid #E4E7EB;
+                      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                      position: relative;
+                      overflow: hidden;
+                  }
+                  .opt-card::before {
+                      content: '';
+                      position: absolute;
+                      top: 0; left: 0;
+                      width: 4px; height: 100%;
+                      background: {{ optimedit_secondary_color }};
+                      transform: scaleY(0);
+                      transform-origin: top;
+                      transition: transform 0.25s ease;
+                  }
+                  .opt-card:hover {
+                      transform: translateY(-4px);
+                      box-shadow: 0 10px 25px rgba(11,61,145,0.15);
+                      border-color: {{ optimedit_secondary_color }};
+                  }
+                  .opt-card:hover::before { transform: scaleY(1); }
+                  .opt-card.current {
+                      background: linear-gradient(135deg, #FFF9EC 0%, #FFFFFF 100%);
+                      border-color: {{ optimedit_accent_color }};
+                  }
+                  .opt-card.current::before { background: {{ optimedit_accent_color }}; transform: scaleY(1); }
+                  .opt-card-icon {
+                      font-size: 2rem;
+                      width: 56px;
+                      height: 56px;
+                      background: {{ optimedit_bg_color }};
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                  }
+                  .opt-card.current .opt-card-icon {
+                      background: {{ optimedit_accent_color }};
+                      color: #fff;
+                  }
+                  .opt-card-title {
+                      font-size: 1.05rem;
+                      font-weight: 600;
+                      color: {{ optimedit_text_color }};
+                  }
+                  .opt-card-desc {
+                      font-size: 0.85rem;
+                      color: #7B8794;
+                      flex: 1;
+                  }
+                  .opt-card-footer {
+                      font-size: 0.75rem;
+                      color: {{ optimedit_secondary_color }};
+                      font-weight: 600;
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      letter-spacing: 0.3px;
+                  }
+                  .opt-card.current .opt-card-footer { color: {{ optimedit_accent_color }}; }
+
+                  /* ============================================================
+                     BANDEAU TECHNIQUE / DIAGNOSTIC (bas de page)
+                     ============================================================ */
+                  .opt-debug {
+                      background: #0B1220;
+                      color: #C7D2E0;
+                      border-radius: 14px;
+                      padding: 24px 28px;
+                      margin-top: 48px;
+                      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                      font-size: 0.85rem;
+                      border: 1px solid #1F2D45;
+                      box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+                      position: relative;
+                      overflow: hidden;
+                  }
+                  .opt-debug::before {
+                      content: '';
+                      position: absolute;
+                      top: 0; left: 0;
+                      width: 100%; height: 3px;
+                      background: linear-gradient(90deg, #00E5FF 0%, {{ optimedit_accent_color }} 50%, #00E5FF 100%);
+                  }
+                  .opt-debug-header {
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      flex-wrap: wrap;
+                      gap: 12px;
+                      padding-bottom: 14px;
+                      margin-bottom: 16px;
+                      border-bottom: 1px dashed #1F2D45;
+                  }
+                  .opt-debug-title {
+                      font-size: 0.95rem;
+                      font-weight: 700;
+                      color: #00E5FF;
+                      letter-spacing: 1px;
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                  }
+                  .opt-debug-title::before {
+                      content: '●';
+                      color: #00FF88;
+                      font-size: 1.2rem;
+                      animation: pulse 2s infinite;
+                  }
+                  @keyframes pulse {
+                      0%, 100% { opacity: 1; }
+                      50% { opacity: 0.3; }
+                  }
+                  .opt-debug-badge {
+                      background: #1F2D45;
+                      color: #00E5FF;
+                      padding: 4px 12px;
+                      border-radius: 6px;
+                      font-size: 0.75rem;
+                      font-weight: 700;
+                      letter-spacing: 0.5px;
+                  }
+                  .opt-debug-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                      gap: 10px 32px;
+                  }
+                  .opt-debug-line {
+                      display: flex;
+                      align-items: baseline;
+                      gap: 8px;
+                      padding: 6px 0;
+                      border-bottom: 1px solid rgba(31,45,69,0.5);
+                  }
+                  .opt-debug-label {
+                      color: #7B8794;
+                      min-width: 200px;
+                      font-size: 0.8rem;
+                  }
+                  .opt-debug-label::before {
+                      content: '>';
+                      color: #00E5FF;
+                      margin-right: 8px;
+                  }
+                  .opt-debug-value {
+                      color: #FFFFFF;
+                      font-weight: 700;
+                      word-break: break-all;
+                  }
+                  .opt-debug-value.highlight {
+                      color: {{ optimedit_accent_color }};
+                  }
+                  .opt-debug-value.success {
+                      color: #00FF88;
+                  }
+                  .opt-debug-footer {
+                      margin-top: 16px;
+                      padding-top: 12px;
+                      border-top: 1px dashed #1F2D45;
+                      font-size: 0.75rem;
+                      color: #52606D;
+                      display: flex;
+                      justify-content: space-between;
+                      flex-wrap: wrap;
+                      gap: 12px;
+                      align-items: center;
+                  }
+                  .opt-debug-refresh {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 6px;
+                      background: #1F2D45;
+                      color: #00E5FF;
+                      padding: 6px 14px;
+                      border-radius: 6px;
+                      font-size: 0.75rem;
+                      font-weight: 700;
+                      cursor: pointer;
+                      border: 1px solid #00E5FF;
+                      transition: background 0.2s ease, color 0.2s ease;
+                      font-family: inherit;
+                  }
+                  .opt-debug-refresh:hover {
+                      background: #00E5FF;
+                      color: #0B1220;
+                  }
+
+                  /* ============================================================
+                     PIED DE PAGE
+                     ============================================================ */
+                  footer.opt-footer {
+                      background: {{ optimedit_primary_color }};
+                      color: rgba(255,255,255,0.85);
+                      padding: 24px 40px;
+                      font-size: 0.8rem;
+                  }
+                  .opt-footer-inner {
+                      max-width: 1400px;
+                      margin: 0 auto;
+                      display: flex;
+                      justify-content: space-between;
+                      flex-wrap: wrap;
+                      gap: 16px;
+                  }
+                  .opt-footer strong { color: {{ optimedit_accent_color }}; }
+
+                  /* ============================================================
+                     RESPONSIVE
+                     ============================================================ */
+                  @media (max-width: 768px) {
+                      header.opt-header, nav.opt-nav, main.opt-main, footer.opt-footer { padding-left: 20px; padding-right: 20px; }
+                      .opt-hero { padding: 24px; }
+                      .opt-hero h1 { font-size: 1.4rem; }
+                      .opt-header-meta { text-align: left; }
+                      .opt-debug-label { min-width: 140px; font-size: 0.75rem; }
+                  }
+              </style>
+          </head>
+          <body>
+
+              <!-- ============================================================
+                   EN-TÊTE
+                   ============================================================ -->
+              <header class="opt-header">
+                  <div class="opt-header-inner">
+                      <div>
+                          <div class="opt-brand">
+                              <div class="opt-brand-logo">OP</div>
+                              <div>
+                                  <div>OPTIMEDIT</div>
+                                  <div class="opt-brand-subtitle">Portail applicatif — {{ domain_name }}</div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="opt-header-meta">
+                          Serveur : <strong>{{ ansible_hostname }}</strong><br>
+                          Cible Ansible : {{ inventory_hostname }}
+                          <div class="opt-health {% if w3svc_status == 'started' %}up{% else %}down{% endif %}">
+                              W3SVC : {{ w3svc_status | upper }}
+                          </div>
+                      </div>
+                  </div>
+
+                  <nav class="opt-nav">
+                      <div class="opt-nav-inner">
+          {% for app in iis_applications %}
+                          <a href="http://{{ app.name }}.{{ domain_name }}/"
+                             class="{% if app.name == item.name %}active{% endif %}"
+                             title="Accéder à {{ optimedit_app_labels[app.name].label | default(app.name) }}">
+                              {{ optimedit_app_labels[app.name].icon | default('•') }} {{ optimedit_app_labels[app.name].label | default(app.name | title) }}
+                          </a>
+          {% endfor %}
+                      </div>
+                  </nav>
+              </header>
+
+              <!-- ============================================================
+                   CONTENU PRINCIPAL
+                   ============================================================ -->
+              <main class="opt-main">
+
+                  <section class="opt-hero">
+                      <h1>
+                          <span class="opt-hero-icon">{{ optimedit_app_labels[item.name].icon | default('•') }}</span>
+                          {{ optimedit_app_labels[item.name].label | default(item.name | title) }}
+                      </h1>
+                      <p>
+                          Bienvenue sur l'espace applicatif <strong>{{ optimedit_app_labels[item.name].label | default(item.name | title) }}</strong>
+                          du groupe OPTIMEDIT. Utilisez le menu ci-dessus ou les cartes ci-dessous
+                          pour accéder aux autres applications métiers de l'entreprise.
+                      </p>
+                      <div class="opt-hero-meta">
+                          <span>🌐 Domaine : <strong>{{ domain_name }}</strong></span>
+                          <span>🖥️ Hôte : <strong>{{ ansible_hostname }}</strong></span>
+                          <span>📦 Site IIS : <strong>Site_{{ item.name }}</strong></span>
+                          <span>🔌 Port dédié : <strong>{{ item.port }}</strong></span>
+                      </div>
+                  </section>
+
+                  <h2 class="opt-section-title">Applications métiers OPTIMEDIT</h2>
+                  <div class="opt-grid">
+          {% for app in iis_applications %}
+                      <a class="opt-card {% if app.name == item.name %}current{% endif %}"
+                         href="http://{{ app.name }}.{{ domain_name }}/">
+                          <div class="opt-card-icon">
+                              {{ optimedit_app_labels[app.name].icon | default('•') }}
+                          </div>
+                          <div class="opt-card-title">
+                              {{ optimedit_app_labels[app.name].label | default(app.name | title) }}
+                          </div>
+                          <div class="opt-card-desc">
+                              {% if app.name == item.name %}
+                                  Vous consultez actuellement cette application.
+                              {% else %}
+                                  Accéder à l'application {{ optimedit_app_labels[app.name].label | default(app.name | title) | lower }}.
+                              {% endif %}
+                          </div>
+                          <div class="opt-card-footer">
+                              {% if app.name == item.name %}
+                                  ● Application courante
+                              {% else %}
+                                  → Ouvrir {{ app.name }}.{{ domain_name }}
+                              {% endif %}
+                          </div>
+                      </a>
+          {% endfor %}
+                  </div>
+
+                  <!-- ============================================================
+                       BANDEAU TECHNIQUE / DIAGNOSTIC DE BASCULE
+                       ============================================================ -->
+                  <section class="opt-debug">
+                      <div class="opt-debug-header">
+                          <div class="opt-debug-title">DIAGNOSTIC SERVEUR &amp; BASCULE BACKEND</div>
+                          <div class="opt-debug-badge">REVERSE PROXY ARR → IIS</div>
+                      </div>
+
+                      <div class="opt-debug-grid">
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Application consultée</span>
+                              <span class="opt-debug-value highlight">{{ item.name | upper }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Cible Inventaire Ansible</span>
+                              <span class="opt-debug-value">{{ inventory_hostname }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Nom Réel OS Windows (Fact)</span>
+                              <span class="opt-debug-value success">{{ ansible_hostname }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Adresse IP du nœud actif</span>
+                              <span class="opt-debug-value">{{ ansible_default_ipv4.address | default('N/A') }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Site IIS local</span>
+                              <span class="opt-debug-value">Site_{{ item.name }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Application Pool</span>
+                              <span class="opt-debug-value">Pool_{{ item.name }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Identité du Pool</span>
+                              <span class="opt-debug-value">{{ item.user }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Port dédié HTTPS</span>
+                              <span class="opt-debug-value">{{ item.port }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Domaine applicatif</span>
+                              <span class="opt-debug-value">{{ item.name }}.{{ domain_name }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Système d'exploitation</span>
+                              <span class="opt-debug-value">{{ ansible_distribution }} {{ ansible_distribution_version }}</span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">État du service W3SVC</span>
+                              <span class="opt-debug-value {% if w3svc_status == 'started' %}success{% else %}highlight{% endif %}">
+                                  {{ w3svc_status | upper }}
+                              </span>
+                          </div>
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Timestamp de génération</span>
+                              <span class="opt-debug-value">{{ ansible_date_time.iso8601 | default('N/A') }}</span>
+                          </div>
+                      </div>
+
+                      <div class="opt-debug-footer">
+                          <div>💡 <strong>Astuce diagnostic :</strong> si le nom OS Windows affiché change après un rafraîchissement (F5), cela indique une bascule automatique du backend par le reverse proxy ARR.</div>
+                          <button class="opt-debug-refresh" onclick="location.href=location.pathname+'?t='+Date.now()">
+                              ↻ Rafraîchir le diagnostic
+                          </button>
+                      </div>
+                  </section>
+
+              </main>
+
+              <!-- ============================================================
+                   PIED DE PAGE
+                   ============================================================ -->
+              <footer class="opt-footer">
+                  <div class="opt-footer-inner">
+                      <div>
+                          © {{ ansible_date_time.year | default('2026') }} <strong>OPTIMEDIT</strong> —
+                          Portail applicatif interne — Domaine {{ domain_name }}
+                      </div>
+                      <div>
+                          Généré par Ansible — Serveur <strong>{{ ansible_hostname }}</strong>
+                      </div>
+                  </div>
+              </footer>
+
+          </body>
+          </html>
         dest: "{{ item.path }}\\index.html"
+        force: yes
       loop: "{{ iis_applications }}"
+      register: portal_generation
+
+    # ==========================================================================
+    # 4. Récapitulatif du déploiement du portail
+    # ==========================================================================
+    - name: "PORTAL - Récapitulatif de génération"
+      ansible.builtin.debug:
+        msg: "Portail généré pour {{ item.item.name }}.{{ domain_name }} → {{ item.item.path }}\\index.html"
+      loop: "{{ portal_generation.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item.changed
