@@ -33,4 +33,4 @@ Pour explorer un projet spécifique, veuillez naviguer directement dans l'arbore
 * `/PKI/` : Autorités de certification, gestion des certificats SSL/TLS et scripts de renouvellement ACME.
 
 ---
-*Documentation globale gérée par **Driss Benelkaid** — [Optimedit.eu](https://optimedit.eu)*
+*Documentation intégralement implémentée et gérée par **Driss Benelkaid** — [Optimedit.eu](https://optimedit.eu)*
