@@ -13,7 +13,7 @@
 - name: "Génération du portail applicatif OPTIMEDIT sur les 13 sites IIS"
   hosts: srv_iis
   become: false
-  gather_facts: true   # OBLIGATOIRE pour ansible_hostname, ansible_default_ipv4, ansible_date_time
+  gather_facts: true   # OBLIGATOIRE pour ansible_hostname, ansible_date_time
 
   vars:
     # ----------------------------------------------------------------------
@@ -35,7 +35,7 @@
       paie:          { label: "Paie & Rémunération",    icon: "💶" }
       rh:            { label: "Ressources Humaines",    icon: "👥" }
       ce:            { label: "Comité d'Entreprise",    icon: "🤝" }
-      it:            { label: "Systèmes & Réseaux",     icon: "💻" }
+      it:            { label: "Service informatique",   icon: "💻" }
       production:    { label: "Production",             icon: "🏭" }
       formation:     { label: "Formation",              icon: "🎓" }
       achat:         { label: "Achats & Fournisseurs",  icon: "🛒" }
@@ -65,6 +65,26 @@
     - name: "DIAG - Définition de la variable d'état W3SVC"
       ansible.builtin.set_fact:
         w3svc_status: "{{ w3svc_info.services[0].state | default('unknown') }}"
+
+    # ==========================================================================
+    # 2bis. Définition de l'adresse IP active du nœud (cascade de fallbacks)
+    # ==========================================================================
+    - name: "DIAG - Définition de l'adresse IP active du nœud"
+      ansible.builtin.set_fact:
+        active_ip: >-
+          {{
+            srv_ip_address
+            if (srv_ip_address is defined and srv_ip_address | length > 0)
+            else (
+              ansible_default_ipv4.address
+              if (ansible_default_ipv4 is defined and ansible_default_ipv4.address is defined)
+              else (
+                ansible_ip_addresses | reject('search', ':') | first
+                if (ansible_ip_addresses is defined and ansible_ip_addresses | length > 0)
+                else 'N/A'
+              )
+            )
+          }}
 
     # ==========================================================================
     # 3. Génération de la page index.html du portail applicatif
@@ -614,7 +634,7 @@
                           </div>
                           <div class="opt-debug-line">
                               <span class="opt-debug-label">Adresse IP du nœud actif</span>
-                              <span class="opt-debug-value">{{ ansible_default_ipv4.address | default('N/A') }}</span>
+                              <span class="opt-debug-value">{{ active_ip }}</span>
                           </div>
                           <div class="opt-debug-line">
                               <span class="opt-debug-label">Site IIS local</span>
