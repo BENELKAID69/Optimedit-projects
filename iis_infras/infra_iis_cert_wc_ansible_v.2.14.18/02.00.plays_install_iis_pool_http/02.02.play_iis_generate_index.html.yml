@@ -1,13 +1,20 @@
 ---
 # ==============================================================================
 # Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/02.00.plays_install_iis_pool_http
-# Fichier      : 02.02.play_iis_generate_index.html.yml
+# Fichier     : 02.02.play_iis_generate_index.html.yml
 # Description  : Génération d'un portail applicatif HTML/CSS professionnel
 #                pour les 13 applications métiers OPTIMEDIT.
 #                Chaque site affiche :
 #                  - Un portail métier avec navigation croisée
 #                  - Un bandeau technique de diagnostic (bascule ARR/IIS)
 #                  - Un indicateur de santé W3SVC en temps réel
+# Modifications : URL HTTP vers URL HTTPS dans ces deux lignes de "Menu horizontal" et "Cartes " & (Il devient HTTPS par défaut)
+
+#                       {% for app in iis_applications %}
+#                         <a href="http://{{ app.name }}.{{ domain_name }}/"
+
+#                         href="http://{{ app.name }}.{{ domain_name }}/">
+#                         <div class="opt-card-icon">
 # ==============================================================================
 
 - name: "Génération du portail applicatif OPTIMEDIT sur les 13 sites IIS"
@@ -548,7 +555,7 @@
                   <nav class="opt-nav">
                       <div class="opt-nav-inner">
           {% for app in iis_applications %}
-                          <a href="http://{{ app.name }}.{{ domain_name }}/"
+                          <a href="https://{{ app.name }}.{{ domain_name }}/"
                              class="{% if app.name == item.name %}active{% endif %}"
                              title="Accéder à {{ optimedit_app_labels[app.name].label | default(app.name) }}">
                               {{ optimedit_app_labels[app.name].icon | default('•') }} {{ optimedit_app_labels[app.name].label | default(app.name | title) }}
@@ -585,7 +592,7 @@
                   <div class="opt-grid">
           {% for app in iis_applications %}
                       <a class="opt-card {% if app.name == item.name %}current{% endif %}"
-                         href="http://{{ app.name }}.{{ domain_name }}/">
+                         href="https://{{ app.name }}.{{ domain_name }}/">
                           <div class="opt-card-icon">
                               {{ optimedit_app_labels[app.name].icon | default('•') }}
                           </div>
