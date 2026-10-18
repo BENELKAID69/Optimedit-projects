@@ -1,0 +1,147 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/07.00.plays_persistents_databases
+# Fichier     : 07.02.play_iis_deploy_metier_forms.yml
+# Description : Déploiement des formulaires métiers ASP.NET et configuration de la MachineKey
+#               pour la compatibilité Web Farm.
+# ==============================================================================
+
+- name: "Déploiement des formulaires métiers ASP.NET et MachineKey"
+  hosts: srv_iis
+  gather_facts: true
+
+  vars:
+    sql_listener: "SQL-AG-LSTNR.optimedit.eu"
+
+  tasks:
+    # ==========================================================================
+    # 1. Injection de la MachineKey dans les web.config
+    # ==========================================================================
+    - name: "WEBCONFIG -01- Injection de la MachineKey identique sur tous les backends"
+      ansible.windows.win_shell: |
+        $webConfigPath = "{{ item.path }}\web.config"
+        if (Test-Path $webConfigPath) {
+            [xml]$xml = Get-Content $webConfigPath
+            
+            $systemWeb = $xml.SelectSingleNode("/configuration/system.web")
+            if (-not $systemWeb) {
+                $systemWeb = $xml.CreateElement("system.web")
+                $xml.configuration.AppendChild($systemWeb) | Out-Null
+            }
+
+            $oldKey = $systemWeb.SelectSingleNode("machineKey")
+            if ($oldKey) { $systemWeb.RemoveChild($oldKey) | Out-Null }
+
+            $machineKey = $xml.CreateElement("machineKey")
+            $machineKey.SetAttribute("validationKey", "2572D9348893391032D8D6B626932E5C132D70EFEFB3E3C49A077607852CA31CD884BBC4A1DCA0BB1C66CE865C8559E623B6E5A2F388F0DF2ECA738A0262E1EF")
+            $machineKey.SetAttribute("decryptionKey", "A40745131B1163D6C0A857D8B2AD876CB4A9CF16AC92859F17025CDEB3820911")
+            $machineKey.SetAttribute("validation", "SHA1")
+            $machineKey.SetAttribute("decryption", "AES")
+
+            $systemWeb.AppendChild($machineKey) | Out-Null
+            $xml.Save($webConfigPath)
+        }
+      loop: "{{ iis_applications }}"
+      changed_when: true
+
+    # ==========================================================================
+    # 2. Génération du formulaire métier (.aspx) - CORRIGÉ
+    # ==========================================================================
+    - name: "FORMS -02- Génération du formulaire métier (.aspx)"
+      ansible.windows.win_copy:
+        content: |
+          <%@ Page Language="C#" EnableViewState="false" %>
+          <%@ Import Namespace="System.Data.SqlClient" %>
+          <%@ Import Namespace="System.Data" %>
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <title>Formulaire Métier - {{ item.name | title }}</title>
+              <style>
+                  body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 40px; }
+                  .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+                  h1 { color: #0B3D91; border-bottom: 2px solid #F5A623; padding-bottom: 10px; }
+                  .form-group { margin-bottom: 15px; }
+                  label { display: block; font-weight: bold; margin-bottom: 5px; }
+                  input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+                  button { background: #0B3D91; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+                  button:hover { background: #1E88E5; }
+                  .grid { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                  .grid th, .grid td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                  .grid th { background: #0B3D91; color: white; }
+                  .info { background: #e3f2fd; padding: 15px; border-left: 5px solid #1E88E5; margin-bottom: 20px; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Formulaire Métier : {{ item.name | title }}</h1>
+                  
+                  <div class="info">
+                      <strong>Backend IIS actuel :</strong> <%= System.Environment.MachineName %><br>
+                      <strong>ID de Session :</strong> <%= Session.SessionID %>
+                  </div>
+
+                  <script runat="server">
+                      string connString = "Data Source={{ sql_listener }};Initial Catalog=DB_{{ item.name }};Integrated Security=True;";
+                      string tableName = "[dbo].[_PoC_Formulaire]";
+                      
+                      void Page_Load(object sender, EventArgs e) {
+                          if (!IsPostBack) {
+                              BindGrid();
+                          }
+                      }
+
+                      void SaveData(object sender, EventArgs e) {
+                          string sql = "INSERT INTO " + tableName + " (Backend_IIS, SessionID, DonneeMetier) VALUES (@b, @s, @d)";
+                          try {
+                              using (SqlConnection conn = new SqlConnection(connString)) {
+                                  conn.Open();
+                                  SqlCommand cmd = new SqlCommand(sql, conn);
+                                  cmd.Parameters.AddWithValue("@b", System.Environment.MachineName);
+                                  cmd.Parameters.AddWithValue("@s", Session.SessionID);
+                                  cmd.Parameters.AddWithValue("@d", txtDonnee.Text);
+                                  cmd.ExecuteNonQuery();
+                              }
+                              txtDonnee.Text = "";
+                              BindGrid();
+                          } catch (Exception ex) {
+                              Response.Write("<div style='color:red;'>Erreur d'insertion : " + ex.Message + "</div>");
+                          }
+                      }
+
+                      void BindGrid() {
+                          string sql = "SELECT TOP 10 * FROM " + tableName + " ORDER BY ID DESC";
+                          try {
+                              using (SqlConnection conn = new SqlConnection(connString)) {
+                                  conn.Open();
+                                  SqlDataAdapter da = new SqlDataAdapter(sql, conn);
+                                  DataTable dt = new DataTable();
+                                  da.Fill(dt);
+                                  
+                                  gridView.DataSource = dt;
+                                  gridView.DataBind();
+                              }
+                          } catch (Exception ex) {
+                              Response.Write("<div style='color:red;'>Erreur de lecture : " + ex.Message + "</div>");
+                          }
+                      }
+                  </script>
+
+                  <form id="form1" runat="server">
+                      <div class="form-group">
+                          <label>Saisir une donnée métier :</label>
+                          <asp:TextBox ID="txtDonnee" runat="server" placeholder="Tapez votre texte ici..."></asp:TextBox>
+                      </div>
+                      <asp:Button ID="btnSave" runat="server" Text="Enregistrer dans la base SQL" OnClick="SaveData" />
+                      
+                      <h3>10 dernières données enregistrées (tous backends confondus) :</h3>
+                      <asp:GridView ID="gridView" runat="server" CssClass="grid" AutoGenerateColumns="true" GridLines="None" />
+                  </form>
+              </div>
+          </body>
+          </html>
+        # LA CORRECTION EST ICI : on utilise des guillemets simples et un seul antislash
+        dest: '{{ item.path }}\formulaire_metier.aspx'
+        force: yes
+      loop: "{{ iis_applications }}"

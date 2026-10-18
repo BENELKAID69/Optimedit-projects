@@ -625,7 +625,25 @@
                           <div class="opt-debug-title">DIAGNOSTIC SERVEUR &amp; BASCULE BACKEND</div>
                           <div class="opt-debug-badge">REVERSE PROXY ARR → IIS</div>
                       </div>
+                      
+                      <!-- ============================================================ -->
+                      <!-- LIGNE AJOUTÉE Session State : Bannière  Session State State                       -->
+                      <!-- ============================================================ -->
+                      <div style="background-color: rgba(0, 255, 136, 0.1); border: 1px solid #00FF88; border-radius: 8px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                          <div style="color: #00FF88; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                              <span style="font-size: 1.2rem;">✅</span> ASP.NET Session State Configuré (Base SQL Server)
+                          </div>
+                          <a href="/test_session.aspx" target="_blank" style="background-color: #00FF88; color: #0B1220; padding: 8px 16px; border-radius: 6px; font-weight: 900; text-decoration: none; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(0,255,136,0.2);">
+                              🔗 Tester le Session State
+                          </a>
+                      </div>
+                      <!-- ============================================================ -->
 
+                      <div class="opt-debug-grid">
+                          <div class="opt-debug-line">
+                              <span class="opt-debug-label">Application consultée</span>
+                              <span class="opt-debug-value highlight">{{ item.name | upper }}</span>
+                          </div>
                       <div class="opt-debug-grid">
                           <div class="opt-debug-line">
                               <span class="opt-debug-label">Application consultée</span>

@@ -102,6 +102,18 @@ execute_playbook "05.00.plays_pools_recycling_maintenances/05.03.play_iis_mainte
 execute_playbook "05.00.plays_pools_recycling_maintenances/05.04.play_iis_audit_pools_recycling_status.yml" "Audit d'état et vérification des configurations de recyclage"
 execute_playbook "05.00.plays_pools_recycling_maintenances/05.05.play_iis_audit_was_activity_logs.yml" "Audit de l'activité WAS (Windows Process Activation Service) via l'Event Viewer"
 
+# --- ÉTAPE 06 : SESSION STATE SQL (SPÉCIFIQUE PROJET ALWAYS ON) ---
+echo -e "\n${BLUE}--- Étape 06 : Intégration Session State SQL Server ---${NC}"
+execute_playbook "06.00.plays_session_state/06.01.play_iis_install_aspnet.yml" "Installation d'ASP.NET 4.5"
+execute_playbook "06.00.plays_session_state/06.02.play_iis_generate_webconfig.yml" "Génération des fichiers web.config"
+execute_playbook "06.00.plays_session_state/06.03.play_iis_deploy_test_page.yml" "Génération des fichiers test_session.aspx"
+
+# --- ÉTAPE 07 : PERSISTANCE DES DONNÉES (PROJET ALWAYS ON) ---
+echo -e "\n${BLUE}--- Étape 07 : PROJET Persistance des Données (Session State & Formulaires) ---${NC}"
+execute_playbook "07.00.plays_persistents_databases/07.01.play_iis_generate_index.html.yml" "Mise à jour du portail (Ajout boutons)"
+execute_playbook "07.00.plays_persistents_databases/07.02.play_iis_deploy_metier_forms.yml" "Déploiement des formulaires métiers ASP.NET"
+
+
 # =========================================================================
 # FIN DE L'ORCHESTRATION
 # =========================================================================

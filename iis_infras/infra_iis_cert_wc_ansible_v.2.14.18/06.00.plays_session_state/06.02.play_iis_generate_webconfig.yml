@@ -1,0 +1,48 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/06.00.plays_session_state
+# Fichier     : 06.02.play_iis_generate_webconfig.yml
+# Description : Génération du fichier web.config pour le Session State SQL Server
+# ==============================================================================
+- name: "Génération du web.config pour le Session State SQL Server"
+  hosts: srv_iis
+  gather_facts: false
+
+  vars:
+    sql_listener: "SQL-AG-LSTNR.optimedit.eu"
+    aspstate_db: "ASPState"
+
+  tasks:
+    - name: "WEBCONFIG -01- Génération du web.config sur les 13 sites"
+      ansible.windows.win_copy:
+        content: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          <configuration>
+              <system.webServer>
+                  <security>
+                      <authentication>
+                          <anonymousAuthentication userName="" />
+                      </authentication>
+                  </security>
+              </system.webServer>
+              <system.web>
+                  <customErrors mode="Off" />
+                  <sessionState mode="SQLServer" 
+                                cookieless="false" 
+                                timeout="20" 
+                                allowCustomSqlDatabase="true"
+                                sqlConnectionString="Data Source={{ sql_listener }};Initial Catalog={{ aspstate_db }};Integrated Security=True;Application Name=SessionState" />
+              </system.web>
+          </configuration>
+        dest: "{{ item.path }}\\web.config"
+        force: yes
+      loop: "{{ iis_applications }}"
+      register: webconfig_generation
+
+    - name: "WEBCONFIG -02- Récapitulatif de génération"
+      ansible.builtin.debug:
+        msg: "web.config généré pour {{ item.item.name }}.{{ domain_name }} → {{ item.item.path }}\\web.config"
+      loop: "{{ webconfig_generation.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item.changed
