@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Topologie Optimedit</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'base',
+            flowchart: { curve: 'basis', htmlLabels: true },
+            themeVariables: {
+                fontFamily: 'arial',
+                primaryColor: '#f4f6f9',
+                edgeLabelBackground: '#ffffff'
+            }
+        });
+    </script>
+    <style>
+        body { display: flex; justify-content: center; background-color: #ffffff; padding: 20px; }
+    </style>
+</head>
+<body>
+    <pre class="mermaid">
+        flowchart TD
+            %% =========================================================
+            %% DÉFINITION DES STYLES (identiques à votre image)
+            %% =========================================================
+            classDef internet fill:#ffe6e6,stroke:#cc0000,stroke-width:2px,color:#000;
+            classDef proxy fill:#e6f2ff,stroke:#0066cc,stroke-width:2px,color:#000;
+            classDef web fill:#fff2e6,stroke:#ff8000,stroke-width:2px,color:#000;
+            classDef sql fill:#e6f9e6,stroke:#2eb82e,stroke-width:2px,color:#000;
+            classDef listener fill:#e6f2ff,stroke:#0066cc,stroke-width:2px,color:#000;
+            classDef cno fill:#ffffff,stroke:#666666,stroke-width:2px,stroke-dasharray: 5 5,color:#000;
+            classDef ad fill:#f2e6ff,stroke:#8000cc,stroke-width:2px,color:#000;
+            classDef fs fill:#f2f2f2,stroke:#666666,stroke-width:2px,color:#000;
+
+            %% =========================================================
+            %% BLOC 1 : Flux d'entrée & SSL (Horizontal)
+            %% =========================================================
+            subgraph Ligne1 ["1. Flux d'entrée & Chaîne de confiance SSL"]
+                direction LR
+                Internet(["🌐 Internet<br/>(Clients Web Publics)"]):::internet
+                RP01["🛡️ OPT-RP-01<br/>(Reverse Proxy ARR)<br/>192.168.1.200"]:::proxy
+                IIS_Farm["🖥️ OPT-IIS-01 à OPT-IIS-06<br/>(6 Serveurs Web)<br/>192.168.1.119 à .124"]:::web
+                
+                Internet ==>|"HTTPS (443)<br/>🔒 Certificat Public<br/>(SAN 13 sites)"| RP01
+                RP01 ==>|"HTTPS (443)<br/>🔒 Certificat ADCS<br/>(SAN 13 sites)<br/>ARR Load Balancing"| IIS_Farm
+            end
+
+            %% =========================================================
+            %% BLOC 2 : Infrastructure Backend (Horizontal)
+            %% =========================================================
+            subgraph Ligne2 ["2. Infrastructure Backend, Cluster & Données"]
+                direction LR
+                
+                %% Sous-groupe SQL
+                subgraph Cluster_SQL ["Cluster SQL Always On (WSFC)"]
+                    direction LR
+                    CNO["⚙️ CL-SQL-AG (CNO)<br/>192.168.1.253"]:::cno
+                    Listener{"🎧 SQL-AG-LSTNR<br/>(Listener)<br/>192.168.1.250"}:::listener
+                    SQL01[("🗄️ SQLS01 (Primaire)<br/>192.168.1.251")]:::sql
+                    SQL02[("🗄️ SQLS02 (Secondaire)<br/>192.168.1.252")]:::sql
+                    
+                    CNO -.->|"Gestion WSFC"| Listener
+                    Listener ==>|"Routage Actif"| SQL01
+                    SQL01 <==>|"Réplication Synchrone<br/>(TCP 5022)"| SQL02
+                end
+
+                %% Sous-groupe Infra
+                subgraph Infra ["Services d'Infrastructure"]
+                    direction TB
+                    DC03(["🛡️ DC03<br/>(AD / DNS / ADCS)<br/>192.168.1.202"]):::ad
+                    FS03(["📁 OPT-FS03<br/>(Témoin FSW)<br/>192.168.1.201"]):::fs
+                end
+            end
+
+            %% =========================================================
+            %% CONNEXIONS ENTRE LES DEUX BLOCS (et inter-services)
+            %% =========================================================
+            IIS_Farm ==>|"SQL (TCP 1433)<br/>🔐 Kerberos"| Listener
+            IIS_Farm -.->|"Kerberos (88)"| DC03
+
+            SQL01 -.->|"Quorum (SMB 445)"| FS03
+            SQL02 -.->|"Quorum (SMB 445)"| FS03
+            SQL01 -.->|"Kerberos (88)"| DC03
+            SQL02 -.->|"Kerberos (88)"| DC03
+
+            %% Styles des liens
+            linkStyle 0,1 stroke:#0066cc,stroke-width:2px;
+            linkStyle 2 stroke:#2eb82e,stroke-width:2px;
+            linkStyle 3 stroke:#2eb82e,stroke-width:2px;
+            linkStyle 4,5 stroke:#2eb82e,stroke-width:1.5px,stroke-dasharray: 5 5;
+            linkStyle 6,7,8,9 stroke:#8000cc,stroke-width:1.5px,stroke-dasharray: 3 3;
+    </pre>
+</body>
+</html>

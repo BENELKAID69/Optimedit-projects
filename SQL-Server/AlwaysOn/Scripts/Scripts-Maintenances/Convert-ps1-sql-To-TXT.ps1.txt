@@ -1,0 +1,51 @@
+# Convert-Ps1SqlToTxt.ps1
+# Ajoute l'extension .txt à la fin de tous les fichiers .ps1 et .sql
+# du dossier courant et de tous ses sous-dossiers.
+
+[CmdletBinding()]
+param(
+    [string]$RootPath = (Get-Location).Path,
+    [switch]$WhatIf
+)
+
+Write-Host "Dossier racine : $RootPath" -ForegroundColor Cyan
+
+# Récupère tous les .ps1 et .sql (récursif)
+$files = Get-ChildItem -Path $RootPath -Recurse -File -Include *.ps1, *.sql -ErrorAction SilentlyContinue
+
+if (-not $files) {
+    Write-Host "Aucun fichier .ps1 ou .sql trouvé." -ForegroundColor Yellow
+    return
+}
+
+$count = 0
+foreach ($file in $files) {
+    # Évite de retraiter un fichier déjà terminé par .txt
+    if ($file.Name -like '*.ps1.txt' -or $file.Name -like '*.sql.txt') {
+        continue
+    }
+
+    $newName = $file.Name + '.txt'
+    $newFull = Join-Path $file.DirectoryName $newName
+
+    if (Test-Path -LiteralPath $newFull) {
+        Write-Warning "Existe déjà, ignoré : $newFull"
+        continue
+    }
+
+    try {
+        if ($WhatIf) {
+            Write-Host "[WhatIf] $($file.FullName)  ->  $newName" -ForegroundColor DarkGray
+        }
+        else {
+            Rename-Item -LiteralPath $file.FullName -NewName $newName -ErrorAction Stop
+            Write-Host "OK  $($file.Name)  ->  $newName" -ForegroundColor Green
+        }
+        $count++
+    }
+    catch {
+        Write-Warning "Échec sur $($file.FullName) : $($_.Exception.Message)"
+    }
+}
+
+Write-Host "`nTerminé. $count fichier(s) traité(s)." -ForegroundColor Cyan

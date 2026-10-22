@@ -1,0 +1,69 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/06.00.plays_session_state
+# Fichier     : 06.03.play_iis_deploy_test_page.yml
+# Description : Déploiement de la page de test test_session.aspx
+# ==============================================================================
+- name: "Déploiement de la page de test Session State"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    - name: "TEST -01- Génération du fichier test_session.aspx"
+      ansible.windows.win_copy:
+        content: |
+          <%@ Page Language="C#" %>
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Test Session State SQL</title>
+              <style>
+                  body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f4f6f9; }
+                  .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 600px; }
+                  h1 { color: #0B3D91; }
+                  .data { font-size: 1.2rem; margin: 15px 0; }
+                  .value { font-weight: bold; color: #F5A623; }
+                  .success { color: #00cc66; font-weight: bold; }
+                  .error { color: #cc0000; font-weight: bold; }
+              </style>
+          </head>
+          <body>
+              <div class="box">
+                  <h1>Diagnostic Session State</h1>
+                  <%
+                      try {
+                          string serveur = System.Environment.MachineName;
+                          
+                          if (Session["Compteur"] == null) {
+                              Session["Compteur"] = 1;
+                          } else {
+                              Session["Compteur"] = (int)Session["Compteur"] + 1;
+                          }
+                          
+                          string sessionId = Session.SessionID;
+                  %>
+                  
+                  <div class="data">Backend IIS actuel : <span class="value"><%= serveur %></span></div>
+                  <div class="data">ID de session : <span class="value"><%= sessionId %></span></div>
+                  <div class="data">Valeur du compteur : <span class="value"><%= Session["Compteur"] %></span></div>
+                  
+                  <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                  
+                  <p><strong>Comment tester :</strong></p>
+                  <ol>
+                      <li>Rafraichissez la page (F5). Le compteur doit augmenter.</li>
+                      <li>Si le nom du backend change mais que le compteur continue d'augmenter, <strong class="success">le Session State fonctionne !</strong></li>
+                  </ol>
+                  <%
+                      } catch (Exception ex) {
+                  %>
+                      <div class="data error">❌ Erreur de Session : <%= ex.Message %></div>
+                  <%
+                      }
+                  %>
+              </div>
+          </body>
+          </html>
+        dest: "{{ item.path }}\\test_session.aspx"
+        force: yes
+      loop: "{{ iis_applications }}"

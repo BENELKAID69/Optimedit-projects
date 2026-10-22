@@ -1,0 +1,21 @@
+---
+# ==============================================================================
+# Emplacement : /projets_optimedit/iis_infras/infra_iis_cert_wc_ansible_v.2.14.18/06.00.plays_session_state
+# Fichier     : 06.01.play_iis_install_aspnet.yml
+# Description : Installation de la fonctionnalité ASP.NET 4.5 (requis pour le Session State)
+# ==============================================================================
+- name: "Installation d'ASP.NET 4.5 sur les backends IIS"
+  hosts: srv_iis
+  gather_facts: false
+
+  tasks:
+    - name: "ASPNET -01- Installation de Web-Asp-Net45"
+      ansible.windows.win_feature:
+        name: Web-Asp-Net45
+        state: present
+        include_management_tools: yes
+      register: aspnet_install
+
+    - name: "ASPNET -02- Redémarrage d'IIS (si nécessaire)"
+      ansible.windows.win_shell: iisreset /noforce
+      when: aspnet_install.changed

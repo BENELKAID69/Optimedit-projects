@@ -1,0 +1,52 @@
+# Restore-TxtToOriginal.ps1
+# Renomme les fichiers *.ps1.txt -> *.ps1  et  *.sql.txt -> *.sql
+# dans le dossier courant (ou spécifié) et tous ses sous-dossiers.
+
+# .\Restore-TxtToOriginal.ps1 -WhatIf
+# Sur un autre dossier:
+# .\Restore-TxtToOriginal.ps1 -RootPath 'D:\Autre\Chemin'
+
+[CmdletBinding()]
+param(
+    [string]$RootPath = (Get-Location).Path,
+    [switch]$WhatIf
+)
+
+Write-Host "Dossier racine : $RootPath" -ForegroundColor Cyan
+
+# On cible uniquement les fichiers finissant par .ps1.txt ou .sql.txt
+$files = Get-ChildItem -Path $RootPath -Recurse -File -ErrorAction SilentlyContinue |
+         Where-Object { $_.Name -like '*.ps1.txt' -or $_.Name -like '*.sql.txt' }
+
+if (-not $files) {
+    Write-Host "Aucun fichier .ps1.txt ou .sql.txt trouvé." -ForegroundColor Yellow
+    return
+}
+
+$count = 0
+foreach ($file in $files) {
+    # Retire uniquement le dernier ".txt"
+    $newName = $file.Name -replace '\.txt$', ''
+    $newFull = Join-Path $file.DirectoryName $newName
+
+    if (Test-Path -LiteralPath $newFull) {
+        Write-Warning "Existe déjà, ignoré : $newFull"
+        continue
+    }
+
+    try {
+        if ($WhatIf) {
+            Write-Host "[WhatIf] $($file.Name)  ->  $newName" -ForegroundColor DarkGray
+        }
+        else {
+            Rename-Item -LiteralPath $file.FullName -NewName $newName -ErrorAction Stop
+            Write-Host "OK  $($file.Name)  ->  $newName" -ForegroundColor Green
+        }
+        $count++
+    }
+    catch {
+        Write-Warning "Échec sur $($file.FullName) : $($_.Exception.Message)"
+    }
+}
+
+Write-Host "`nTerminé. $count fichier(s) traité(s)." -ForegroundColor Cyan

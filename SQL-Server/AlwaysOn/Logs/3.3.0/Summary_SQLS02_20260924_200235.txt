@@ -1,0 +1,169 @@
+Overall summary:
+  Final result:                  Réussite
+  Exit code (Decimal):           0
+  Start time:                    2026-09-24 20:02:38
+  End time:                      2026-09-24 20:09:01
+  Requested action:              Install
+
+Machine Properties:
+  Machine name:                  SQLS02
+  Machine processor count:       8
+  OS version:                    Microsoft Windows Server 2025 Datacenter Evaluation (10.0.26100)
+  OS service pack:               
+  OS region:                     France
+  OS language:                   français (France)
+  OS architecture:               x64
+  Process architecture:          64 bits
+  OS clustered:                  Non
+
+Product features discovered:
+  Product              Instance             Instance ID                    Feature                                  Language             Edition              Version         Clustered  Configured
+
+Package properties:
+  Description:                   Microsoft SQL Server 2022 
+  ProductName:                   SQL Server 2022
+  Type:                          RTM
+  Version:                       16
+  SPLevel:                       0
+  Installation location:         D:\x64\setup\
+  Installation edition:          Developer
+
+Product Update Status:
+  Aucune n'a été découverte.
+
+Remarque : Veuillez lire les conditions de licence du logiciel Microsoft SQL Server à l'adresse aka.ms/useterms.
+
+Paramètres des entrées d'utilisateur :
+  ACTION:                        Install
+  ADDCURRENTUSERASSQLADMIN:      false
+  AGTSVCACCOUNT:                 optimedit\SVC_SQL_Agent
+  AGTSVCPASSWORD:                *****
+  AGTSVCSTARTUPTYPE:             Automatic
+  ASBACKUPDIR:                   Backup
+  ASCOLLATION:                   Latin1_General_CI_AS
+  ASCONFIGDIR:                   Config
+  ASDATADIR:                     Data
+  ASLOGDIR:                      Log
+  ASPROVIDERMSOLAP:              1
+  ASSERVERMODE:                  TABULAR
+  ASSVCACCOUNT:                  <vide>
+  ASSVCPASSWORD:                 <vide>
+  ASSVCSTARTUPTYPE:              Automatic
+  ASSYSADMINACCOUNTS:            <vide>
+  ASTELSVCACCT:                  <vide>
+  ASTELSVCPASSWORD:              <vide>
+  ASTELSVCSTARTUPTYPE:           0
+  ASTEMPDIR:                     Temp
+  AZUREARCPROXYSERVER:           <vide>
+  AZUREBILLEDEDITION:            
+  AZUREREGION:                   <vide>
+  AZURERESOURCEGROUP:            <vide>
+  AZURESERVICEPRINCIPAL:         <vide>
+  AZURESERVICEPRINCIPALSECRET:   <vide>
+  AZURESUBSCRIPTIONID:           <vide>
+  AZURETENANTID:                 <vide>
+  BROWSERSVCSTARTUPTYPE:         Disabled
+  CONFIGURATIONFILE:             C:\Program Files\Microsoft SQL Server\160\Setup Bootstrap\Log\20260924_200235\ConfigurationFile.ini
+  ENABLERANU:                    false
+  ENU:                           false
+  EXTSVCACCOUNT:                 <vide>
+  EXTSVCPASSWORD:                <vide>
+  FEATURES:                      SQLENGINE
+  FILESTREAMLEVEL:               0
+  FILESTREAMSHARENAME:           <vide>
+  FTSVCACCOUNT:                  <vide>
+  FTSVCPASSWORD:                 <vide>
+  HELP:                          false
+  IACCEPTSQLSERVERLICENSETERMS:  true
+  IACKNOWLEDGEENTCALLIMITS:      false
+  INDICATEPROGRESS:              false
+  INSTALLSHAREDDIR:              C:\Program Files\Microsoft SQL Server\
+  INSTALLSHAREDWOWDIR:           C:\Program Files (x86)\Microsoft SQL Server\
+  INSTALLSQLDATADIR:             S:\SQL\Data
+  INSTANCEDIR:                   C:\Program Files\Microsoft SQL Server\
+  INSTANCEID:                    MSSQLSERVER
+  INSTANCENAME:                  MSSQLSERVER
+  ISMASTERSVCACCOUNT:            NT AUTHORITY\Network Service
+  ISMASTERSVCPASSWORD:           <vide>
+  ISMASTERSVCPORT:               8391
+  ISMASTERSVCSSLCERTCN:          <vide>
+  ISMASTERSVCSTARTUPTYPE:        Automatic
+  ISMASTERSVCTHUMBPRINT:         <vide>
+  ISSVCACCOUNT:                  NT AUTHORITY\Network Service
+  ISSVCPASSWORD:                 <vide>
+  ISSVCSTARTUPTYPE:              Automatic
+  ISTELSVCACCT:                  <vide>
+  ISTELSVCPASSWORD:              <vide>
+  ISTELSVCSTARTUPTYPE:           0
+  ISWORKERSVCACCOUNT:            NT AUTHORITY\Network Service
+  ISWORKERSVCCERT:               <vide>
+  ISWORKERSVCMASTER:             <vide>
+  ISWORKERSVCPASSWORD:           <vide>
+  ISWORKERSVCSTARTUPTYPE:        Automatic
+  NPENABLED:                     0
+  PBDMSSVCACCOUNT:               <vide>
+  PBDMSSVCPASSWORD:              <vide>
+  PBDMSSVCSTARTUPTYPE:           0
+  PBENGSVCACCOUNT:               <vide>
+  PBENGSVCPASSWORD:              <vide>
+  PBENGSVCSTARTUPTYPE:           0
+  PBPORTRANGE:                   <vide>
+  PID:                           *****
+  PRODUCTCOVEREDBYSA:            false
+  QUIET:                         true
+  QUIETSIMPLE:                   false
+  ROLE:                          
+  SAPWD:                         <vide>
+  SECURITYMODE:                  <vide>
+  SQLBACKUPDIR:                  S:\SQL\Backup
+  SQLCOLLATION:                  SQL_Latin1_General_CP1_CI_AS
+  SQLMAXDOP:                     8
+  SQLMAXMEMORY:                  2147483647
+  SQLMINMEMORY:                  0
+  SQLSVCACCOUNT:                 optimedit\SVC_SQL_Engine
+  SQLSVCINSTANTFILEINIT:         false
+  SQLSVCPASSWORD:                *****
+  SQLSVCSTARTUPTYPE:             Automatic
+  SQLSYSADMINACCOUNTS:           optimedit\Administrateur
+  SQLTELSVCACCT:                 NT Service\SQLTELEMETRY
+  SQLTELSVCPASSWORD:             <vide>
+  SQLTELSVCSTARTUPTYPE:          Automatic
+  SQLTEMPDBDIR:                  S:\SQL\TempDB
+  SQLTEMPDBFILECOUNT:            8
+  SQLTEMPDBFILEGROWTH:           64
+  SQLTEMPDBFILESIZE:             8
+  SQLTEMPDBLOGDIR:               <vide>
+  SQLTEMPDBLOGFILEGROWTH:        64
+  SQLTEMPDBLOGFILESIZE:          8
+  SQLUSERDBDIR:                  <vide>
+  SQLUSERDBLOGDIR:               S:\SQL\Log
+  SUPPRESSPAIDEDITIONNOTICE:     false
+  SUPPRESSPRIVACYSTATEMENTNOTICE: false
+  TCPENABLED:                    1
+  UIMODE:                        Normal
+  UpdateEnabled:                 true
+  UpdateSource:                  MU
+  USEMICROSOFTUPDATE:            false
+  USESQLRECOMMENDEDMEMORYLIMITS: false
+
+  Configuration file:            C:\Program Files\Microsoft SQL Server\160\Setup Bootstrap\Log\20260924_200235\ConfigurationFile.ini
+
+Detailed results:
+  Feature:                       Services Moteur de base de données
+  Status:                        Réussite
+
+  Feature:                       SQL Browser
+  Status:                        Réussite
+
+  Feature:                       SQL Writer
+  Status:                        Réussite
+
+  Feature:                       Fichiers de support du programme d'installation
+  Status:                        Réussite
+
+Rules with failures or warnings:
+
+Global rules:
+Avertissement IsFirewallEnabled                Le pare-feu Windows est activé. Assurez-vous que les ports appropriés sont ouverts pour permettre l'accès à distance. Consultez la documentation des règles sur https://go.microsoft.com/fwlink/?linkid=2162127 pour plus d'informations sur les ports à ouvrir pour chaque fonctionnalité.
+
+Rules report file:               C:\Program Files\Microsoft SQL Server\160\Setup Bootstrap\Log\20260924_200235\SystemConfigurationCheck_Report.htm

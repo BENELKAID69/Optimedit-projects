@@ -57,7 +57,7 @@
           <html lang="fr">
           <head>
               <meta charset="UTF-8">
-              <title>Formulaire Métier - {{ item.name | title }}</title>
+              <title>Formulaire Metier - {{ item.name | title }}</title>
               <style>
                   body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 40px; }
                   .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
@@ -75,7 +75,7 @@
           </head>
           <body>
               <div class="container">
-                  <h1>Formulaire Métier : {{ item.name | title }}</h1>
+                  <h1>Formulaire Metier : {{ item.name | title }}</h1>
                   
                   <div class="info">
                       <strong>Backend IIS actuel :</strong> <%= System.Environment.MachineName %><br>
@@ -130,12 +130,12 @@
 
                   <form id="form1" runat="server">
                       <div class="form-group">
-                          <label>Saisir une donnée métier :</label>
+                          <label>Saisir une donnee metier :</label>
                           <asp:TextBox ID="txtDonnee" runat="server" placeholder="Tapez votre texte ici..."></asp:TextBox>
                       </div>
                       <asp:Button ID="btnSave" runat="server" Text="Enregistrer dans la base SQL" OnClick="SaveData" />
                       
-                      <h3>10 dernières données enregistrées (tous backends confondus) :</h3>
+                      <h3>10 dernieres donnees enregistrees (tous backends confondus) :</h3>
                       <asp:GridView ID="gridView" runat="server" CssClass="grid" AutoGenerateColumns="true" GridLines="None" />
                   </form>
               </div>

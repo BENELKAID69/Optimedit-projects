@@ -1,0 +1,5 @@
+les paramètres pour contact@optimedit.eu, OVHcloud MX Plan 
+
+Serveur								Port	Sécurité
+IMAP (réception)	ssl0.ovh.net (ou imap.mail.ovh.net)	993	SSL/TLS
+SMTP (envoi)		ssl0.ovh.net (ou smtp.mail.ovh.net)	465	SSL/TLS
