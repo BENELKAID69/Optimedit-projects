@@ -23,7 +23,7 @@ Voici un aperçu des principaux modules et documentations référencés dans ce 
 | **🔐 PKI (PowerShell 5.1)** | CertifyScripts — Automatisation de certificats sécurisée (AES + PowerShell 5.1). | [Voir le README](https://github.com/BENELKAID69/Optimedit-projects/blob/main/PKI/02.PKI-Publique/Certify%20Hub/01.ACME-HTTP-01/01.Solution-Scripts-PS/CertifyScripts---Deploy/PowerShell-v5.1/README-Certify-PS5.1-Task.md) |
 | **🔐 PKI (PowerShell 7)** | CertifyScripts — Automatisation de certificats cross-plateforme (PowerShell 7+). | [Voir le README](https://github.com/BENELKAID69/Optimedit-projects/blob/main/PKI/02.PKI-Publique/Certify%20Hub/01.ACME-HTTP-01/01.Solution-Scripts-PS/CertifyScripts---Deploy/PowerShell-pwsh-v7/README-Certify-PS7-Task.md) |
 | **🗄️ PKI (CCS Natif)** | CertifyHub — Migration et gestion vers le Centralized Certificate Store (CCS). | [Voir le README](https://github.com/BENELKAID69/Optimedit-projects/blob/main/PKI/02.PKI-Publique/Certify%20Hub/01.ACME-HTTP-01/02.Solution-CCS-Natif/README-Certify-CCS-Task.md) |
-
+| **🗄️ SQL Server (Always On)** | SQL Server 2022 - Always On Availability Groups & Session State. | [Voir le README](https://github.com/BENELKAID69/Optimedit-projects/blob/main/SQL-Server/AlwaysOn/AlwaysOn.README.md) |
 ---
 
 ## 📋 Navigation Rapide
@@ -33,4 +33,4 @@ Pour explorer un projet spécifique, veuillez naviguer directement dans l'arbore
 * `/PKI/` : Autorités de certification, gestion des certificats SSL/TLS et scripts de renouvellement ACME.
 
 ---
-*Documentation intégralement implémentée et gérée par **Driss Benelkaid** — [Optimedit.eu](https://optimedit.eu)*
+*Documentation globale gérée par **Driss Benelkaid** — [Optimedit.eu](https://optimedit.eu)*
